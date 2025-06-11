@@ -71,10 +71,24 @@ const ItemForm = ({ item, onSuccess, categories, suppliers }: ItemFormProps) => 
 
   const onSubmit = async (data: ItemFormData) => {
     try {
+      // Ensure name and sku are provided as strings, not optional
+      const itemData = {
+        name: data.name,
+        sku: data.sku,
+        description: data.description || undefined,
+        category_id: data.category_id || undefined,
+        supplier_id: data.supplier_id || undefined,
+        quantity: data.quantity,
+        min_stock_level: data.min_stock_level,
+        price: data.price,
+        cost: data.cost,
+        barcode: data.barcode || undefined,
+      };
+
       if (item) {
-        updateItem({ id: item.id, ...data });
+        updateItem({ id: item.id, ...itemData });
       } else {
-        createItem(data);
+        createItem(itemData);
       }
       onSuccess();
       if (!item) {
