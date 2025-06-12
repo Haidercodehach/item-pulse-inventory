@@ -41,12 +41,47 @@ interface NotificationSettings {
   email_notifications: boolean;
 }
 
+// Type guard functions
+const isCompanyInfo = (obj: any): obj is CompanyInfo => {
+  return obj && typeof obj === 'object' && 
+    typeof obj.name === 'string' &&
+    typeof obj.address === 'string' &&
+    typeof obj.phone === 'string' &&
+    typeof obj.email === 'string' &&
+    typeof obj.website === 'string' &&
+    typeof obj.logo_url === 'string';
+};
+
+const isInvoiceSettings = (obj: any): obj is InvoiceSettings => {
+  return obj && typeof obj === 'object' &&
+    typeof obj.prefix === 'string' &&
+    typeof obj.start_number === 'number' &&
+    typeof obj.tax_rate === 'number' &&
+    typeof obj.currency === 'string' &&
+    typeof obj.due_days === 'number';
+};
+
+const isThemeSettings = (obj: any): obj is ThemeSettings => {
+  return obj && typeof obj === 'object' &&
+    typeof obj.primary_color === 'string' &&
+    typeof obj.secondary_color === 'string' &&
+    typeof obj.accent_color === 'string' &&
+    typeof obj.dark_mode === 'boolean';
+};
+
+const isNotificationSettings = (obj: any): obj is NotificationSettings => {
+  return obj && typeof obj === 'object' &&
+    typeof obj.low_stock_alerts === 'boolean' &&
+    typeof obj.sale_notifications === 'boolean' &&
+    typeof obj.email_notifications === 'boolean';
+};
+
 const CustomizationSettings = () => {
   const { settings, getSetting, updateSetting, isUpdating } = useSettings();
   
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => {
     const setting = getSetting('company_info');
-    const defaultValue = {
+    const defaultValue: CompanyInfo = {
       name: 'Your Company',
       address: '123 Business St',
       phone: '+1-555-0123',
@@ -54,40 +89,56 @@ const CustomizationSettings = () => {
       website: 'www.company.com',
       logo_url: ''
     };
-    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as CompanyInfo) } : defaultValue;
+    
+    if (setting?.setting_value && isCompanyInfo(setting.setting_value)) {
+      return { ...defaultValue, ...setting.setting_value };
+    }
+    return defaultValue;
   });
 
   const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>(() => {
     const setting = getSetting('invoice_settings');
-    const defaultValue = {
+    const defaultValue: InvoiceSettings = {
       prefix: 'INV',
       start_number: 1001,
       tax_rate: 0.0875,
       currency: 'USD',
       due_days: 30
     };
-    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as InvoiceSettings) } : defaultValue;
+    
+    if (setting?.setting_value && isInvoiceSettings(setting.setting_value)) {
+      return { ...defaultValue, ...setting.setting_value };
+    }
+    return defaultValue;
   });
 
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
     const setting = getSetting('theme_settings');
-    const defaultValue = {
+    const defaultValue: ThemeSettings = {
       primary_color: '#3b82f6',
       secondary_color: '#64748b',
       accent_color: '#f59e0b',
       dark_mode: false
     };
-    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as ThemeSettings) } : defaultValue;
+    
+    if (setting?.setting_value && isThemeSettings(setting.setting_value)) {
+      return { ...defaultValue, ...setting.setting_value };
+    }
+    return defaultValue;
   });
 
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
     const setting = getSetting('notification_settings');
-    const defaultValue = {
+    const defaultValue: NotificationSettings = {
       low_stock_alerts: true,
       sale_notifications: true,
       email_notifications: false
     };
-    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as NotificationSettings) } : defaultValue;
+    
+    if (setting?.setting_value && isNotificationSettings(setting.setting_value)) {
+      return { ...defaultValue, ...setting.setting_value };
+    }
+    return defaultValue;
   });
 
   const handleSaveCompanyInfo = () => {
