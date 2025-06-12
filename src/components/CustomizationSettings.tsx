@@ -41,14 +41,22 @@ interface NotificationSettings {
 }
 
 const CustomizationSettings = () => {
-  const { settings, updateSetting, isLoading } = useSettings();
+  const { settings, updateSetting, settingsLoading, isUpdating } = useSettings();
   const { toast } = useToast();
 
   // Helper function to safely parse and get settings with defaults
   const getCompanyInfo = (): CompanyInfo => {
     const companySetting = settings.find(s => s.setting_key === 'company_info');
     if (companySetting?.setting_value && typeof companySetting.setting_value === 'object' && !Array.isArray(companySetting.setting_value)) {
-      return companySetting.setting_value as CompanyInfo;
+      const value = companySetting.setting_value as Record<string, any>;
+      return {
+        name: value.name || '',
+        address: value.address || '',
+        phone: value.phone || '',
+        email: value.email || '',
+        website: value.website || '',
+        logo_url: value.logo_url || ''
+      };
     }
     return {
       name: '',
@@ -63,7 +71,14 @@ const CustomizationSettings = () => {
   const getInvoiceSettings = (): InvoiceSettings => {
     const invoiceSetting = settings.find(s => s.setting_key === 'invoice_settings');
     if (invoiceSetting?.setting_value && typeof invoiceSetting.setting_value === 'object' && !Array.isArray(invoiceSetting.setting_value)) {
-      return invoiceSetting.setting_value as InvoiceSettings;
+      const value = invoiceSetting.setting_value as Record<string, any>;
+      return {
+        prefix: value.prefix || 'INV',
+        start_number: value.start_number || 1000,
+        tax_rate: value.tax_rate || 0,
+        currency: value.currency || 'USD',
+        due_days: value.due_days || 30
+      };
     }
     return {
       prefix: 'INV',
@@ -77,7 +92,13 @@ const CustomizationSettings = () => {
   const getThemeSettings = (): ThemeSettings => {
     const themeSetting = settings.find(s => s.setting_key === 'theme_settings');
     if (themeSetting?.setting_value && typeof themeSetting.setting_value === 'object' && !Array.isArray(themeSetting.setting_value)) {
-      return themeSetting.setting_value as ThemeSettings;
+      const value = themeSetting.setting_value as Record<string, any>;
+      return {
+        primary_color: value.primary_color || '#3B82F6',
+        secondary_color: value.secondary_color || '#6B7280',
+        accent_color: value.accent_color || '#8B5CF6',
+        dark_mode: value.dark_mode || false
+      };
     }
     return {
       primary_color: '#3B82F6',
@@ -90,7 +111,12 @@ const CustomizationSettings = () => {
   const getNotificationSettings = (): NotificationSettings => {
     const notificationSetting = settings.find(s => s.setting_key === 'notification_settings');
     if (notificationSetting?.setting_value && typeof notificationSetting.setting_value === 'object' && !Array.isArray(notificationSetting.setting_value)) {
-      return notificationSetting.setting_value as NotificationSettings;
+      const value = notificationSetting.setting_value as Record<string, any>;
+      return {
+        low_stock_alerts: value.low_stock_alerts ?? true,
+        sale_notifications: value.sale_notifications ?? true,
+        email_notifications: value.email_notifications ?? false
+      };
     }
     return {
       low_stock_alerts: true,
@@ -112,38 +138,22 @@ const CustomizationSettings = () => {
   }, [settings]);
 
   const handleCompanyInfoSave = async () => {
-    await updateSetting('company_info', companyInfo);
-    toast({
-      title: "Success",
-      description: "Company information updated successfully",
-    });
+    updateSetting({ key: 'company_info', value: companyInfo });
   };
 
   const handleInvoiceSettingsSave = async () => {
-    await updateSetting('invoice_settings', invoiceSettings);
-    toast({
-      title: "Success",
-      description: "Invoice settings updated successfully",
-    });
+    updateSetting({ key: 'invoice_settings', value: invoiceSettings });
   };
 
   const handleThemeSettingsSave = async () => {
-    await updateSetting('theme_settings', themeSettings);
-    toast({
-      title: "Success",
-      description: "Theme settings updated successfully",
-    });
+    updateSetting({ key: 'theme_settings', value: themeSettings });
   };
 
   const handleNotificationSettingsSave = async () => {
-    await updateSetting('notification_settings', notificationSettings);
-    toast({
-      title: "Success",
-      description: "Notification settings updated successfully",
-    });
+    updateSetting({ key: 'notification_settings', value: notificationSettings });
   };
 
-  if (isLoading) {
+  if (settingsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-vibrant">
         <div className="animate-pulse-slow">
@@ -270,9 +280,10 @@ const CustomizationSettings = () => {
                 </div>
                 <Button 
                   onClick={handleCompanyInfoSave}
+                  disabled={isUpdating}
                   className="w-full bg-white text-primary hover:bg-white/90 hover-lift"
                 >
-                  Save Company Information
+                  {isUpdating ? 'Saving...' : 'Save Company Information'}
                 </Button>
               </CardContent>
             </Card>
@@ -348,9 +359,10 @@ const CustomizationSettings = () => {
                 </div>
                 <Button 
                   onClick={handleInvoiceSettingsSave}
+                  disabled={isUpdating}
                   className="w-full bg-white text-primary hover:bg-white/90 hover-lift"
                 >
-                  Save Invoice Settings
+                  {isUpdating ? 'Saving...' : 'Save Invoice Settings'}
                 </Button>
               </CardContent>
             </Card>
@@ -410,9 +422,10 @@ const CustomizationSettings = () => {
                 </div>
                 <Button 
                   onClick={handleThemeSettingsSave}
+                  disabled={isUpdating}
                   className="w-full bg-white text-primary hover:bg-white/90 hover-lift"
                 >
-                  Save Theme Settings
+                  {isUpdating ? 'Saving...' : 'Save Theme Settings'}
                 </Button>
               </CardContent>
             </Card>
@@ -467,9 +480,10 @@ const CustomizationSettings = () => {
                 </div>
                 <Button 
                   onClick={handleNotificationSettingsSave}
+                  disabled={isUpdating}
                   className="w-full bg-white text-primary hover:bg-white/90 hover-lift"
                 >
-                  Save Notification Settings
+                  {isUpdating ? 'Saving...' : 'Save Notification Settings'}
                 </Button>
               </CardContent>
             </Card>
