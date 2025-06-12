@@ -8,10 +8,13 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
+import POS from "./pages/POS";
+import Sales from "./pages/Sales";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
+import CustomizationSettings from "./components/CustomizationSettings";
 
 const queryClient = new QueryClient();
 
@@ -38,10 +41,31 @@ const App = () => (
               </Layout>
             </ProtectedRoute>
           } />
+          <Route path="/pos" element={
+            <ProtectedRoute>
+              <Layout>
+                <POS />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/sales" element={
+            <ProtectedRoute>
+              <Layout>
+                <Sales />
+              </Layout>
+            </ProtectedRoute>
+          } />
           <Route path="/settings" element={
             <ProtectedRoute>
               <Layout>
                 <Settings />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/customize" element={
+            <ProtectedRoute>
+              <Layout>
+                <CustomizationSettings />
               </Layout>
             </ProtectedRoute>
           } />

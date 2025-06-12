@@ -5,69 +5,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { User, Shield, Database, Bell, Key } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { User, Shield, Info, Bell, Palette, Building } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
-  const { profile, user } = useAuth();
-  const { toast } = useToast();
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
-    full_name: profile?.full_name || '',
-    email: profile?.email || '',
-  });
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUpdatingProfile(true);
-
+  const handleSignOut = async () => {
+    setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: profileData.full_name,
-        })
-        .eq('id', user?.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
     } finally {
-      setIsUpdatingProfile(false);
+      setIsLoading(false);
     }
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'destructive';
-      case 'manager':
-        return 'default';
-      default:
-        return 'secondary';
-    }
+  const handleCustomizationClick = () => {
+    navigate('/customize');
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600">Manage your account settings and preferences</p>
+        <p className="text-gray-600">Manage your account and application preferences</p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue="profile" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
@@ -78,12 +49,12 @@ const Settings = () => {
             Security
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2">
-            <Database className="w-4 h-4" />
+            <Info className="w-4 h-4" />
             System
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="w-4 h-4" />
-            Notifications
+          <TabsTrigger value="customization" className="flex items-center gap-2">
+            <Palette className="w-4 h-4" />
+            Customization
           </TabsTrigger>
         </TabsList>
 
@@ -92,205 +63,154 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>
-                Update your personal information and account details
+                View and manage your profile details
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleProfileUpdate} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Full Name</Label>
-                    <Input
-                      id="full_name"
-                      value={profileData.full_name}
-                      onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profileData.email}
-                      disabled
-                      className="bg-gray-50"
-                    />
-                    <p className="text-sm text-gray-500">
-                      Email cannot be changed from here
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Role</Label>
-                    <div>
-                      <Badge variant={getRoleBadgeVariant(profile?.role || 'employee')}>
-                        {profile?.role?.toUpperCase() || 'EMPLOYEE'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      Contact an administrator to change your role
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Account Created</Label>
-                    <Input
-                      value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
-                      disabled
-                      className="bg-gray-50"
-                    />
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="full-name">Full Name</Label>
+                  <Input
+                    id="full-name"
+                    value={profile?.full_name || ''}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="role">Role</Label>
+                  <div className="mt-1">
+                    <Badge variant="secondary" className="capitalize">
+                      {profile?.role || 'employee'}
+                    </Badge>
                   </div>
                 </div>
-
-                <Button type="submit" disabled={isUpdatingProfile}>
-                  {isUpdatingProfile ? 'Updating...' : 'Update Profile'}
-                </Button>
-              </form>
+                <div>
+                  <Label htmlFor="member-since">Member Since</Label>
+                  <Input
+                    id="member-since"
+                    value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="security">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Key className="w-5 h-5" />
-                  Change Password
-                </CardTitle>
-                <CardDescription>
-                  Update your password to keep your account secure
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>
+                Manage your account security and authentication
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium">Account Security</h3>
                   <p className="text-sm text-gray-600">
-                    To change your password, you'll need to sign out and use the "Forgot Password" option on the login page.
+                    Your account is secured with email authentication through Supabase.
                   </p>
-                  <Button variant="outline" onClick={() => window.location.href = '/auth'}>
-                    Go to Login Page
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-medium text-red-600 mb-2">Danger Zone</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Sign out of your account. You'll need to sign in again to access the application.
+                  </p>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleSignOut}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Signing out...' : 'Sign Out'}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Two-Factor Authentication</CardTitle>
-                <CardDescription>
-                  Add an extra layer of security to your account
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Authenticator App</p>
-                      <p className="text-sm text-gray-600">
-                        Use an authenticator app to generate verification codes
-                      </p>
-                    </div>
-                    <Badge variant="secondary">Coming Soon</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="system">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Information</CardTitle>
-                <CardDescription>
-                  Information about your account and system settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>User ID</Label>
-                      <Input value={user?.id || ''} disabled className="bg-gray-50 font-mono text-sm" />
-                    </div>
-                    <div>
-                      <Label>Last Sign In</Label>
-                      <Input 
-                        value={user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Never'} 
-                        disabled 
-                        className="bg-gray-50" 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Export</CardTitle>
-                <CardDescription>
-                  Export your data for backup or migration purposes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Request an export of your personal data and activity within the system.
-                  </p>
-                  <Button variant="outline" disabled>
-                    Request Data Export
-                    <Badge variant="secondary" className="ml-2">Coming Soon</Badge>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
+              <CardTitle>System Information</CardTitle>
               <CardDescription>
-                Manage how and when you receive notifications
+                Application and system details
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Low Stock Alerts</p>
-                      <p className="text-sm text-gray-600">
-                        Get notified when items are running low
-                      </p>
-                    </div>
-                    <Badge variant="secondary">Coming Soon</Badge>
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Application Version</Label>
+                  <p className="text-sm text-gray-600">v1.0.0</p>
+                </div>
+                <div>
+                  <Label>Last Updated</Label>
+                  <p className="text-sm text-gray-600">{new Date().toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label>Database Status</Label>
+                  <Badge variant="default">Connected</Badge>
+                </div>
+                <div>
+                  <Label>Authentication</Label>
+                  <Badge variant="default">Active</Badge>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t">
+                <h3 className="text-lg font-medium mb-2">Support</h3>
+                <p className="text-sm text-gray-600">
+                  If you need help or have questions, please contact your system administrator.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Email Notifications</p>
-                      <p className="text-sm text-gray-600">
-                        Receive notifications via email
-                      </p>
-                    </div>
-                    <Badge variant="secondary">Coming Soon</Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">System Updates</p>
-                      <p className="text-sm text-gray-600">
-                        Get notified about system maintenance and updates
-                      </p>
-                    </div>
-                    <Badge variant="secondary">Coming Soon</Badge>
-                  </div>
+        <TabsContent value="customization">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                Application Customization
+              </CardTitle>
+              <CardDescription>
+                Customize company information, themes, and application behavior
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium">Available Customizations</h3>
+                  <ul className="text-sm text-gray-600 list-disc list-inside space-y-1 mt-2">
+                    <li>Company information and branding</li>
+                    <li>Invoice settings and templates</li>
+                    <li>Theme colors and appearance</li>
+                    <li>Notification preferences</li>
+                    <li>Point of sale settings</li>
+                  </ul>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <Button onClick={handleCustomizationClick} className="w-full">
+                    <Palette className="w-4 h-4 mr-2" />
+                    Open Customization Settings
+                  </Button>
                 </div>
               </div>
             </CardContent>
