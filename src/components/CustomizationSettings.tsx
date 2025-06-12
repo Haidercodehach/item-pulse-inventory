@@ -8,14 +8,45 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Building, Receipt, Bell, Settings } from 'lucide-react';
+import { Palette, Building, Receipt, Bell } from 'lucide-react';
+
+// Define proper types for settings
+interface CompanyInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  logo_url: string;
+}
+
+interface InvoiceSettings {
+  prefix: string;
+  start_number: number;
+  tax_rate: number;
+  currency: string;
+  due_days: number;
+}
+
+interface ThemeSettings {
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  dark_mode: boolean;
+}
+
+interface NotificationSettings {
+  low_stock_alerts: boolean;
+  sale_notifications: boolean;
+  email_notifications: boolean;
+}
 
 const CustomizationSettings = () => {
   const { settings, getSetting, updateSetting, isUpdating } = useSettings();
   
-  const [companyInfo, setCompanyInfo] = useState(() => {
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => {
     const setting = getSetting('company_info');
-    return setting?.setting_value || {
+    const defaultValue = {
       name: 'Your Company',
       address: '123 Business St',
       phone: '+1-555-0123',
@@ -23,36 +54,40 @@ const CustomizationSettings = () => {
       website: 'www.company.com',
       logo_url: ''
     };
+    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as CompanyInfo) } : defaultValue;
   });
 
-  const [invoiceSettings, setInvoiceSettings] = useState(() => {
+  const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>(() => {
     const setting = getSetting('invoice_settings');
-    return setting?.setting_value || {
+    const defaultValue = {
       prefix: 'INV',
       start_number: 1001,
       tax_rate: 0.0875,
       currency: 'USD',
       due_days: 30
     };
+    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as InvoiceSettings) } : defaultValue;
   });
 
-  const [themeSettings, setThemeSettings] = useState(() => {
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
     const setting = getSetting('theme_settings');
-    return setting?.setting_value || {
+    const defaultValue = {
       primary_color: '#3b82f6',
       secondary_color: '#64748b',
       accent_color: '#f59e0b',
       dark_mode: false
     };
+    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as ThemeSettings) } : defaultValue;
   });
 
-  const [notificationSettings, setNotificationSettings] = useState(() => {
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
     const setting = getSetting('notification_settings');
-    return setting?.setting_value || {
+    const defaultValue = {
       low_stock_alerts: true,
       sale_notifications: true,
       email_notifications: false
     };
+    return setting?.setting_value ? { ...defaultValue, ...(setting.setting_value as NotificationSettings) } : defaultValue;
   });
 
   const handleSaveCompanyInfo = () => {

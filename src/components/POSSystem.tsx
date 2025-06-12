@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useInventory } from '@/hooks/useInventory';
 import { useSales } from '@/hooks/useSales';
@@ -42,7 +41,9 @@ const POSSystem = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const invoiceSettings = getSetting('invoice_settings');
-  const taxRate = invoiceSettings?.setting_value?.tax_rate || 0.0875;
+  const taxRate = invoiceSettings?.setting_value ? 
+    (invoiceSettings.setting_value as { tax_rate: number }).tax_rate || 0.0875 : 
+    0.0875;
 
   const filteredItems = items.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

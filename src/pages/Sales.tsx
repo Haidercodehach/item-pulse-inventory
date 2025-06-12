@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Download, Print, Search, Receipt, DollarSign } from 'lucide-react';
+import { Download, Printer, Search, Receipt, DollarSign } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { downloadInvoice, printInvoice } from '@/utils/invoiceGenerator';
 
@@ -23,7 +23,7 @@ const Sales = () => {
     (sale.customer_name && sale.customer_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.total_amount), 0);
+  const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.total_amount.toString()), 0);
 
   const handleDownloadInvoice = (sale: any) => {
     downloadInvoice(sale, companyInfo, invoiceSettings);
@@ -138,7 +138,7 @@ const Sales = () => {
                       <TableCell>{sale.customer_name || 'Walk-in Customer'}</TableCell>
                       <TableCell>{new Date(sale.created_at).toLocaleDateString()}</TableCell>
                       <TableCell>{sale.sale_items?.length || 0} items</TableCell>
-                      <TableCell className="font-semibold">${parseFloat(sale.total_amount).toFixed(2)}</TableCell>
+                      <TableCell className="font-semibold">${parseFloat(sale.total_amount.toString()).toFixed(2)}</TableCell>
                       <TableCell className="capitalize">{sale.payment_method || 'N/A'}</TableCell>
                       <TableCell>{getPaymentStatusBadge(sale.payment_status)}</TableCell>
                       <TableCell>
@@ -155,7 +155,7 @@ const Sales = () => {
                             size="sm"
                             onClick={() => handlePrintInvoice(sale)}
                           >
-                            <Print className="w-4 h-4" />
+                            <Printer className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
