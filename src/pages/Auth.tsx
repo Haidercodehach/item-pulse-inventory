@@ -8,12 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Navigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, Shield, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight, Shield, Zap, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
   const [signInData, setSignInData] = useState({
     email: '',
@@ -84,6 +87,31 @@ const Auth = () => {
     setIsLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Password reset email sent! Please check your inbox.",
+      });
+      setShowForgotPassword(false);
+      setForgotPasswordEmail('');
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-vibrant relative overflow-hidden">
       {/* Animated background elements */}
@@ -137,44 +165,32 @@ const Auth = () => {
                 Inventory Management
               </CardTitle>
               <CardDescription className="text-center text-white/80">
-                Sign in to your account or create a new one
+                {showForgotPassword ? 'Reset your password' : 'Sign in to your account or create a new one'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm">
-                  <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">
-                    Sign In
-                  </TabsTrigger>
-                  <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">
-                    Sign Up
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="signin">
-                  <form onSubmit={handleSignIn} className="space-y-4">
+              {showForgotPassword ? (
+                <div className="space-y-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="text-white hover:bg-white/10 p-0 h-auto font-normal"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to sign in
+                  </Button>
+                  
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-white">Email</Label>
+                      <Label htmlFor="forgot-email" className="text-white">Email</Label>
                       <Input
-                        id="signin-email"
+                        id="forgot-email"
                         type="email"
                         required
-                        value={signInData.email}
-                        onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-white">Password</Label>
-                      <Input
-                        id="signin-password"
-                        type="password"
-                        required
-                        value={signInData.password}
-                        onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-                        placeholder="Enter your password"
+                        placeholder="Enter your email address"
                       />
                     </div>
                     <Button 
@@ -182,61 +198,119 @@ const Auth = () => {
                       className="w-full bg-white text-primary hover:bg-white/90 hover-lift" 
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Signing In...' : 'Sign In'}
+                      {isLoading ? 'Sending...' : 'Send Reset Email'}
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </form>
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="text-white">Full Name</Label>
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        required
-                        value={signUpData.fullName}
-                        onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-white">Email</Label>
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        required
-                        value={signUpData.email}
-                        onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-white">Password</Label>
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        required
-                        value={signUpData.password}
-                        onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
-                        placeholder="Create a password"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-white text-primary hover:bg-white/90 hover-lift" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Creating Account...' : 'Sign Up'}
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
+                </div>
+              ) : (
+                <Tabs defaultValue="signin" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm">
+                    <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">
+                      Sign In
+                    </TabsTrigger>
+                    <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">
+                      Sign Up
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="signin">
+                    <form onSubmit={handleSignIn} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-email" className="text-white">Email</Label>
+                        <Input
+                          id="signin-email"
+                          type="email"
+                          required
+                          value={signInData.email}
+                          onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-password" className="text-white">Password</Label>
+                        <Input
+                          id="signin-password"
+                          type="password"
+                          required
+                          value={signInData.password}
+                          onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                          placeholder="Enter your password"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-white/80 hover:text-white hover:bg-white/10 p-0 h-auto font-normal text-sm"
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-white text-primary hover:bg-white/90 hover-lift" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Signing In...' : 'Sign In'}
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </form>
+                  </TabsContent>
+                  
+                  <TabsContent value="signup">
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-name" className="text-white">Full Name</Label>
+                        <Input
+                          id="signup-name"
+                          type="text"
+                          required
+                          value={signUpData.fullName}
+                          onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email" className="text-white">Email</Label>
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          required
+                          value={signUpData.email}
+                          onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password" className="text-white">Password</Label>
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          required
+                          value={signUpData.password}
+                          onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                          placeholder="Create a password"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-white text-primary hover:bg-white/90 hover-lift" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Creating Account...' : 'Sign Up'}
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+              )}
             </CardContent>
           </Card>
         </div>
