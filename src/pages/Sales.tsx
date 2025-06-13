@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useSales } from '@/hooks/useSales';
 import { useSettings } from '@/hooks/useSettings';
@@ -9,10 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Printer, Search, Receipt, DollarSign, Sparkles } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { downloadInvoice, printInvoice } from '@/utils/invoiceGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 const Sales = () => {
   const { sales, salesLoading } = useSales();
   const { getSetting } = useSettings();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
   const companyInfo = getSetting('company_info')?.setting_value || {};
@@ -25,12 +26,40 @@ const Sales = () => {
 
   const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.total_amount.toString()), 0);
 
-  const handleDownloadInvoice = (sale: any) => {
-    downloadInvoice(sale, companyInfo, invoiceSettings);
+  const handleDownloadInvoice = async (sale: any) => {
+    try {
+      console.log('Attempting to download invoice for sale:', sale);
+      await downloadInvoice(sale, companyInfo, invoiceSettings);
+      toast({
+        title: "Success",
+        description: "Invoice downloaded successfully!",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download invoice. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handlePrintInvoice = (sale: any) => {
-    printInvoice(sale, companyInfo, invoiceSettings);
+  const handlePrintInvoice = async (sale: any) => {
+    try {
+      console.log('Attempting to print invoice for sale:', sale);
+      await printInvoice(sale, companyInfo, invoiceSettings);
+      toast({
+        title: "Success",
+        description: "Invoice sent to printer!",
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to print invoice. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getPaymentStatusBadge = (status: string) => {

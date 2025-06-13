@@ -12,18 +12,20 @@ export const generateInvoicePDF = (data: InvoiceData) => {
   const { sale, company, settings } = data;
   const doc = new jsPDF();
 
+  console.log('Generating invoice with data:', { sale, company, settings });
+
   // Header
   doc.setFontSize(20);
-  doc.text(company.name || 'Your Company', 20, 20);
+  doc.text(company?.name || 'Your Company', 20, 20);
   
   doc.setFontSize(12);
   doc.text(`Invoice: ${sale.invoice_number}`, 20, 35);
   doc.text(`Date: ${new Date(sale.created_at).toLocaleDateString()}`, 20, 45);
   
   // Company Info
-  if (company.address) doc.text(company.address, 20, 55);
-  if (company.phone) doc.text(`Phone: ${company.phone}`, 20, 65);
-  if (company.email) doc.text(`Email: ${company.email}`, 20, 75);
+  if (company?.address) doc.text(company.address, 20, 55);
+  if (company?.phone) doc.text(`Phone: ${company.phone}`, 20, 65);
+  if (company?.email) doc.text(`Email: ${company.email}`, 20, 75);
 
   // Customer Info
   if (sale.customer_name || sale.customer_email || sale.customer_phone) {
@@ -50,8 +52,8 @@ export const generateInvoicePDF = (data: InvoiceData) => {
   const tableData = sale.sale_items?.map((item: any) => [
     item.inventory_items?.name || 'Unknown Item',
     item.quantity.toString(),
-    `$${parseFloat(item.unit_price).toFixed(2)}`,
-    `$${parseFloat(item.total_price).toFixed(2)}`
+    `$${parseFloat(item.unit_price || 0).toFixed(2)}`,
+    `$${parseFloat(item.total_price || 0).toFixed(2)}`
   ]) || [];
 
   (doc as any).autoTable({
@@ -66,12 +68,12 @@ export const generateInvoicePDF = (data: InvoiceData) => {
   const finalY = (doc as any).lastAutoTable.finalY + 10;
   const totalsX = 140;
   
-  doc.text(`Subtotal: $${parseFloat(sale.subtotal).toFixed(2)}`, totalsX, finalY);
-  doc.text(`Discount: -$${parseFloat(sale.discount_amount).toFixed(2)}`, totalsX, finalY + 10);
-  doc.text(`Tax: $${parseFloat(sale.tax_amount).toFixed(2)}`, totalsX, finalY + 20);
+  doc.text(`Subtotal: $${parseFloat(sale.subtotal || 0).toFixed(2)}`, totalsX, finalY);
+  doc.text(`Discount: -$${parseFloat(sale.discount_amount || 0).toFixed(2)}`, totalsX, finalY + 10);
+  doc.text(`Tax: $${parseFloat(sale.tax_amount || 0).toFixed(2)}`, totalsX, finalY + 20);
   
   doc.setFontSize(14);
-  doc.text(`Total: $${parseFloat(sale.total_amount).toFixed(2)}`, totalsX, finalY + 35);
+  doc.text(`Total: $${parseFloat(sale.total_amount || 0).toFixed(2)}`, totalsX, finalY + 35);
   
   // Footer
   doc.setFontSize(10);
@@ -84,13 +86,25 @@ export const generateInvoicePDF = (data: InvoiceData) => {
   return doc;
 };
 
-export const downloadInvoice = (sale: any, company: any, settings: any) => {
-  const doc = generateInvoicePDF({ sale, company, settings });
-  doc.save(`invoice-${sale.invoice_number}.pdf`);
+export const downloadInvoice = (sale: any, company: any = {}, settings: any = {}) => {
+  try {
+    console.log('Downloading invoice for sale:', sale);
+    const doc = generateInvoicePDF({ sale, company, settings });
+    doc.save(`invoice-${sale.invoice_number}.pdf`);
+  } catch (error) {
+    console.error('Error downloading invoice:', error);
+    throw error;
+  }
 };
 
-export const printInvoice = (sale: any, company: any, settings: any) => {
-  const doc = generateInvoicePDF({ sale, company, settings });
-  doc.autoPrint();
-  window.open(doc.output('bloburl'), '_blank');
+export const printInvoice = (sale: any, company: any = {}, settings: any = {}) => {
+  try {
+    console.log('Printing invoice for sale:', sale);
+    const doc = generateInvoicePDF({ sale, company, settings });
+    doc.autoPrint();
+    window.open(doc.output('bloburl'), '_blank');
+  } catch (error) {
+    console.error('Error printing invoice:', error);
+    throw error;
+  }
 };
