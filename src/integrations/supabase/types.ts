@@ -387,7 +387,12 @@ export type Database = {
       }
     }
     Enums: {
-      transaction_type: "stock_in" | "stock_out" | "adjustment" | "transfer"
+      transaction_type:
+        | "stock_in"
+        | "stock_out"
+        | "adjustment"
+        | "transfer"
+        | "sale"
       user_role: "admin" | "manager" | "employee"
     }
     CompositeTypes: {
@@ -504,7 +509,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      transaction_type: ["stock_in", "stock_out", "adjustment", "transfer"],
+      transaction_type: [
+        "stock_in",
+        "stock_out",
+        "adjustment",
+        "transfer",
+        "sale",
+      ],
       user_role: ["admin", "manager", "employee"],
     },
   },

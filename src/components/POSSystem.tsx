@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useInventory } from '@/hooks/useInventory';
 import { useSales } from '@/hooks/useSales';
@@ -51,9 +52,21 @@ const POSSystem = () => {
   );
 
   const addToCart = (item: any) => {
+    // Check if item has sufficient stock
+    if (!item.quantity || item.quantity <= 0) {
+      console.warn('Insufficient stock for item:', item.name);
+      return;
+    }
+
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     
     if (existingItem) {
+      // Check if adding one more would exceed available stock
+      if (existingItem.quantity >= item.quantity) {
+        console.warn('Cannot add more items - insufficient stock');
+        return;
+      }
+      
       setCart(cart.map(cartItem => 
         cartItem.id === item.id 
           ? { ...cartItem, quantity: cartItem.quantity + 1, total: (cartItem.quantity + 1) * cartItem.price }
@@ -74,6 +87,13 @@ const POSSystem = () => {
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id);
+      return;
+    }
+    
+    // Find the inventory item to check stock
+    const inventoryItem = items.find(item => item.id === id);
+    if (inventoryItem && quantity > inventoryItem.quantity) {
+      console.warn('Cannot set quantity higher than available stock');
       return;
     }
     
@@ -125,6 +145,7 @@ const POSSystem = () => {
     }));
 
     try {
+      console.log('Processing sale with data:', { saleData, saleItems });
       await processSale({ saleData, saleItems });
       clearCart();
       setIsCheckoutOpen(false);
