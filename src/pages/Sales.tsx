@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Download, Printer, Search, Receipt, DollarSign, Sparkles } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { downloadInvoice, printInvoice } from '@/utils/invoiceGenerator';
+import { downloadInvoice, printInvoice } from '@/utils/htmlInvoiceGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 const Sales = () => {
