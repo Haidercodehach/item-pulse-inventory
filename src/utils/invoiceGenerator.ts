@@ -2,6 +2,16 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+// Extend jsPDF type to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
+
 interface InvoiceData {
   sale: any;
   company: any;
@@ -71,6 +81,12 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     }
 
     const doc = new jsPDF();
+    
+    // Verify autoTable is available
+    if (typeof doc.autoTable !== 'function') {
+      console.error('autoTable function not available on jsPDF instance');
+      throw new Error('PDF table generation not available. Please refresh the page and try again.');
+    }
 
     // Header section
     doc.setFontSize(20);
@@ -125,8 +141,8 @@ export const generateInvoicePDF = (data: InvoiceData) => {
       tableData.push(['No items', '0', '$0.00', '$0.00']);
     }
 
-    // Generate items table
-    (doc as any).autoTable({
+    // Generate items table using autoTable
+    doc.autoTable({
       head: [['Item', 'Qty', 'Unit Price', 'Total']],
       body: tableData,
       startY: Math.max(yPosition + 10, 90),
@@ -136,7 +152,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     });
 
     // Calculate totals section position
-    const finalY = (doc as any).lastAutoTable?.finalY || 150;
+    const finalY = doc.lastAutoTable?.finalY || 150;
     const totalsX = 140;
     let totalsY = finalY + 15;
     
