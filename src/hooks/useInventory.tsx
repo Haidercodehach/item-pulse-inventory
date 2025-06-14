@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -154,27 +153,64 @@ export const useInventory = () => {
     },
   });
 
-  // Delete item mutation
+  // Delete item mutation - Fixed to handle the deletion properly
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      console.log('Attempting to delete item with ID:', id);
+      
+      // First check if item has any sales records
+      const { data: saleItems, error: checkError } = await supabase
+        .from('sale_items')
+        .select('id')
+        .eq('item_id', id)
+        .limit(1);
+      
+      if (checkError) {
+        console.error('Error checking sale items:', checkError);
+        throw new Error('Failed to check item dependencies');
+      }
+      
+      if (saleItems && saleItems.length > 0) {
+        throw new Error('Cannot delete item that has been sold. Archive it instead.');
+      }
+      
+      // Delete inventory transactions first
+      const { error: transactionError } = await supabase
+        .from('inventory_transactions')
+        .delete()
+        .eq('item_id', id);
+      
+      if (transactionError) {
+        console.error('Error deleting transactions:', transactionError);
+        throw new Error('Failed to delete item transactions');
+      }
+      
+      // Then delete the item
+      const { error: deleteError } = await supabase
         .from('inventory_items')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (deleteError) {
+        console.error('Error deleting item:', deleteError);
+        throw deleteError;
+      }
+      
+      console.log('Item deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
       toast({
         title: "Success",
         description: "Item deleted successfully!",
       });
     },
     onError: (error: any) => {
+      console.error('Delete mutation error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete item",
         variant: "destructive",
       });
     },

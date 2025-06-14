@@ -15,6 +15,8 @@ const Sales = () => {
   const { getSetting } = useSettings();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
+  const [isPrinting, setIsPrinting] = useState<string | null>(null);
 
   const companyInfo = getSetting('company_info')?.setting_value || {};
   const invoiceSettings = getSetting('invoice_settings')?.setting_value || {};
@@ -28,37 +30,53 @@ const Sales = () => {
 
   const handleDownloadInvoice = async (sale: any) => {
     try {
+      setIsDownloading(sale.id);
       console.log('Attempting to download invoice for sale:', sale);
+      
+      if (!sale || !sale.invoice_number) {
+        throw new Error('Invalid sale data');
+      }
+      
       await downloadInvoice(sale, companyInfo, invoiceSettings);
       toast({
         title: "Success",
         description: "Invoice downloaded successfully!",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
       toast({
         title: "Error",
-        description: "Failed to download invoice. Please try again.",
+        description: error.message || "Failed to download invoice. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDownloading(null);
     }
   };
 
   const handlePrintInvoice = async (sale: any) => {
     try {
+      setIsPrinting(sale.id);
       console.log('Attempting to print invoice for sale:', sale);
+      
+      if (!sale || !sale.invoice_number) {
+        throw new Error('Invalid sale data');
+      }
+      
       await printInvoice(sale, companyInfo, invoiceSettings);
       toast({
         title: "Success",
         description: "Invoice sent to printer!",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Print error:', error);
       toast({
         title: "Error",
-        description: "Failed to print invoice. Please try again.",
+        description: error.message || "Failed to print invoice. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsPrinting(null);
     }
   };
 
@@ -195,17 +213,27 @@ const Sales = () => {
                               variant="outline" 
                               size="sm"
                               onClick={() => handleDownloadInvoice(sale)}
+                              disabled={isDownloading === sale.id}
                               className="border-white/30 text-white hover:bg-white hover:text-primary"
                             >
-                              <Download className="w-4 h-4" />
+                              {isDownloading === sale.id ? (
+                                <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
                             </Button>
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => handlePrintInvoice(sale)}
+                              disabled={isPrinting === sale.id}
                               className="border-white/30 text-white hover:bg-white hover:text-primary"
                             >
-                              <Printer className="w-4 h-4" />
+                              {isPrinting === sale.id ? (
+                                <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <Printer className="w-4 h-4" />
+                              )}
                             </Button>
                           </div>
                         </TableCell>
