@@ -28,25 +28,45 @@ const Sales = () => {
 
   const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.total_amount.toString()), 0);
 
+  const validateSaleForInvoice = (sale: any): string | null => {
+    if (!sale) return 'Sale data is missing';
+    if (!sale.invoice_number) return 'Invoice number is missing';
+    if (!sale.id) return 'Sale ID is missing';
+    if (!sale.created_at) return 'Sale date is missing';
+    if (sale.total_amount === undefined || sale.total_amount === null) return 'Total amount is missing';
+    return null;
+  };
+
   const handleDownloadInvoice = async (sale: any) => {
     try {
       setIsDownloading(sale.id);
-      console.log('Attempting to download invoice for sale:', sale);
       
-      if (!sale || !sale.invoice_number) {
-        throw new Error('Invalid sale data');
+      // Validate sale data
+      const validationError = validateSaleForInvoice(sale);
+      if (validationError) {
+        throw new Error(validationError);
       }
       
+      console.log('Downloading invoice for sale:', {
+        id: sale.id,
+        invoice_number: sale.invoice_number,
+        items_count: sale.sale_items?.length || 0
+      });
+      
       await downloadInvoice(sale, companyInfo, invoiceSettings);
+      
       toast({
         title: "Success",
-        description: "Invoice downloaded successfully!",
+        description: `Invoice ${sale.invoice_number} downloaded successfully!`,
       });
     } catch (error: any) {
       console.error('Download error:', error);
+      
+      const errorMessage = error?.message || 'Failed to download invoice';
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to download invoice. Please try again.",
+        title: "Download Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -57,22 +77,33 @@ const Sales = () => {
   const handlePrintInvoice = async (sale: any) => {
     try {
       setIsPrinting(sale.id);
-      console.log('Attempting to print invoice for sale:', sale);
       
-      if (!sale || !sale.invoice_number) {
-        throw new Error('Invalid sale data');
+      // Validate sale data
+      const validationError = validateSaleForInvoice(sale);
+      if (validationError) {
+        throw new Error(validationError);
       }
       
+      console.log('Printing invoice for sale:', {
+        id: sale.id,
+        invoice_number: sale.invoice_number,
+        items_count: sale.sale_items?.length || 0
+      });
+      
       await printInvoice(sale, companyInfo, invoiceSettings);
+      
       toast({
         title: "Success",
-        description: "Invoice sent to printer!",
+        description: `Invoice ${sale.invoice_number} sent to printer!`,
       });
     } catch (error: any) {
       console.error('Print error:', error);
+      
+      const errorMessage = error?.message || 'Failed to print invoice';
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to print invoice. Please try again.",
+        title: "Print Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -215,6 +246,7 @@ const Sales = () => {
                               onClick={() => handleDownloadInvoice(sale)}
                               disabled={isDownloading === sale.id}
                               className="border-white/30 text-white hover:bg-white hover:text-primary"
+                              title="Download Invoice PDF"
                             >
                               {isDownloading === sale.id ? (
                                 <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -228,6 +260,7 @@ const Sales = () => {
                               onClick={() => handlePrintInvoice(sale)}
                               disabled={isPrinting === sale.id}
                               className="border-white/30 text-white hover:bg-white hover:text-primary"
+                              title="Print Invoice"
                             >
                               {isPrinting === sale.id ? (
                                 <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
