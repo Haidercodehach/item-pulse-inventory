@@ -1,6 +1,6 @@
 
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -62,6 +62,19 @@ const formatSaleItems = (saleItems: any[]): any[] => {
   });
 };
 
+const initializeAutoTable = (doc: jsPDF) => {
+  // Ensure autoTable is available by directly attaching it if needed
+  if (typeof doc.autoTable !== 'function') {
+    // Force attach the autoTable plugin
+    (doc as any).autoTable = autoTable.bind(doc);
+  }
+  
+  if (typeof doc.autoTable !== 'function') {
+    console.error('Failed to initialize autoTable plugin');
+    throw new Error('PDF table generation not available. Please refresh the page and try again.');
+  }
+};
+
 export const generateInvoicePDF = (data: InvoiceData) => {
   const { sale, company = {}, settings = {} } = data;
   
@@ -82,11 +95,8 @@ export const generateInvoicePDF = (data: InvoiceData) => {
 
     const doc = new jsPDF();
     
-    // Verify autoTable is available
-    if (typeof doc.autoTable !== 'function') {
-      console.error('autoTable function not available on jsPDF instance');
-      throw new Error('PDF table generation not available. Please refresh the page and try again.');
-    }
+    // Initialize autoTable plugin
+    initializeAutoTable(doc);
 
     // Header section
     doc.setFontSize(20);
