@@ -62,19 +62,6 @@ const formatSaleItems = (saleItems: any[]): any[] => {
   });
 };
 
-const initializeAutoTable = (doc: jsPDF) => {
-  // Ensure autoTable is available by directly attaching it if needed
-  if (typeof doc.autoTable !== 'function') {
-    // Force attach the autoTable plugin
-    (doc as any).autoTable = autoTable.bind(doc);
-  }
-  
-  if (typeof doc.autoTable !== 'function') {
-    console.error('Failed to initialize autoTable plugin');
-    throw new Error('PDF table generation not available. Please refresh the page and try again.');
-  }
-};
-
 export const generateInvoicePDF = (data: InvoiceData) => {
   const { sale, company = {}, settings = {} } = data;
   
@@ -94,9 +81,6 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     }
 
     const doc = new jsPDF();
-    
-    // Initialize autoTable plugin
-    initializeAutoTable(doc);
 
     // Header section
     doc.setFontSize(20);
@@ -152,7 +136,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     }
 
     // Generate items table using autoTable
-    doc.autoTable({
+    autoTable(doc, {
       head: [['Item', 'Qty', 'Unit Price', 'Total']],
       body: tableData,
       startY: Math.max(yPosition + 10, 90),
@@ -162,7 +146,7 @@ export const generateInvoicePDF = (data: InvoiceData) => {
     });
 
     // Calculate totals section position
-    const finalY = doc.lastAutoTable?.finalY || 150;
+    const finalY = (doc as any).lastAutoTable?.finalY || 150;
     const totalsX = 140;
     let totalsY = finalY + 15;
     
