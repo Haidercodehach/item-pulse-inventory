@@ -1,4 +1,3 @@
-
 -- Create enum for user roles
 CREATE TYPE public.user_role AS ENUM ('admin', 'manager', 'employee');
 
@@ -251,10 +250,8 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.inventory_transactions;
 
 -- Insert some sample data
 INSERT INTO public.categories (name, description) VALUES
-  ('Electronics', 'Electronic devices and components'),
-  ('Office Supplies', 'General office supplies and stationery'),
-  ('Tools', 'Hardware tools and equipment'),
-  ('Software', 'Software licenses and digital products');
+  ('Shop One', 'Shop One'),
+  ('Shop Two', 'Shop Two');
 
 INSERT INTO public.suppliers (name, contact_person, email, phone) VALUES
   ('TechCorp Solutions', 'John Smith', 'john@techcorp.com', '+1-555-0101'),
