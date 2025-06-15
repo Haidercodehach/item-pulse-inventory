@@ -40,7 +40,7 @@ export function AppSidebar() {
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
-                  <SidebarMenuItem key={item.name} active={isActive}>
+                  <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild>
                       <button
                         onClick={() => navigate(item.href)}
@@ -90,3 +90,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
