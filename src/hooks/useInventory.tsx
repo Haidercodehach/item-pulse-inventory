@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -158,23 +159,23 @@ export const useInventory = () => {
     mutationFn: async (id: string) => {
       console.log('Attempting to delete item with ID:', id);
       
-      // First check if item has any sales records
+      // Check if item has been sold by looking at sale_items table
       const { data: saleItems, error: checkError } = await supabase
         .from('sale_items')
         .select('id')
         .eq('item_id', id)
         .limit(1);
       
-      if (checkError) {
+      if (checkError && checkError.code !== 'PGRST116') {
         console.error('Error checking sale items:', checkError);
         throw new Error('Failed to check item dependencies');
       }
       
       if (saleItems && saleItems.length > 0) {
-        throw new Error('Cannot delete item that has been sold. Archive it instead.');
+        throw new Error('Cannot delete item that has been sold. Please contact administrator.');
       }
       
-      // Delete inventory transactions first
+      // Delete inventory transactions first (they reference the item)
       const { error: transactionError } = await supabase
         .from('inventory_transactions')
         .delete()
