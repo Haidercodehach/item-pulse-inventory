@@ -1,54 +1,103 @@
-
-import { useState } from 'react';
-import { useInventory } from '@/hooks/useInventory';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Filter, Edit, Trash2, Package, Sparkles } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { useIsMobile } from '@/hooks/use-mobile';
-import ItemForm from '@/components/ItemForm';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useInventory } from "@/hooks/useInventory";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Package,
+  Sparkles,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ItemForm from "@/components/ItemForm";
+import { useToast } from "@/hooks/use-toast";
 
 const Inventory = () => {
-  const { items, categories, suppliers, deleteItem, isLoading, isDeleting } = useInventory();
+  const { items, categories, suppliers, deleteItem, isLoading, isDeleting } =
+    useInventory();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedSupplier, setSelectedSupplier] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSupplier, setSelectedSupplier] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || item.category_id === selectedCategory;
-    const matchesSupplier = selectedSupplier === 'all' || item.supplier_id === selectedSupplier;
-    
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.description &&
+        item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCategory =
+      selectedCategory === "all" || item.category_id === selectedCategory;
+    const matchesSupplier =
+      selectedSupplier === "all" || item.supplier_id === selectedSupplier;
+
     return matchesSearch && matchesCategory && matchesSupplier;
   });
 
   const handleDelete = async (itemId: string, itemName: string) => {
-    if (window.confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
+      )
+    ) {
       deleteItem(itemId);
     }
   };
 
   const getStockStatus = (quantity: number, minStock: number) => {
-    if (quantity === 0) return { label: 'Out of Stock', variant: 'destructive' as const };
-    if (quantity <= minStock) return { label: 'Low Stock', variant: 'secondary' as const };
-    return { label: 'In Stock', variant: 'default' as const };
+    if (quantity === 0)
+      return { label: "Out of Stock", variant: "destructive" as const };
+    if (quantity <= minStock)
+      return { label: "Low Stock", variant: "secondary" as const };
+    return { label: "In Stock", variant: "default" as const };
   };
 
   const AddItemForm = () => (
-    <ItemForm 
+    <ItemForm
       onSuccess={() => setIsAddDialogOpen(false)}
       categories={categories}
       suppliers={suppliers}
@@ -56,7 +105,7 @@ const Inventory = () => {
   );
 
   const EditItemForm = () => (
-    <ItemForm 
+    <ItemForm
       item={editingItem}
       onSuccess={() => setEditingItem(null)}
       categories={categories}
@@ -92,9 +141,11 @@ const Inventory = () => {
               <Package className="w-6 h-6 md:w-8 md:h-8 animate-float" />
               Inventory Management
             </h1>
-            <p className="text-white/80 text-sm md:text-base">Manage your inventory items, track stock levels, and more</p>
+            <p className="text-white/80 text-sm md:text-base">
+              Manage your inventory items, track stock levels, and more
+            </p>
           </div>
-          
+
           {isMobile ? (
             <Drawer open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DrawerTrigger asChild>
@@ -131,7 +182,10 @@ const Inventory = () => {
         </div>
 
         {/* Filters */}
-        <Card className="glass border-white/20 hover-lift animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <Card
+          className="glass border-white/20 hover-lift animate-slide-up"
+          style={{ animationDelay: "200ms" }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white text-lg">
               <Filter className="w-4 h-4" />
@@ -149,7 +203,10 @@ const Inventory = () => {
                   className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
                 />
               </div>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -162,7 +219,10 @@ const Inventory = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
+              <Select
+                value={selectedSupplier}
+                onValueChange={setSelectedSupplier}
+              >
                 <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
                   <SelectValue placeholder="All Suppliers" />
                 </SelectTrigger>
@@ -184,7 +244,10 @@ const Inventory = () => {
         </Card>
 
         {/* Inventory Table */}
-        <Card className="glass border-white/20 hover-lift animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <Card
+          className="glass border-white/20 hover-lift animate-slide-up"
+          style={{ animationDelay: "300ms" }}
+        >
           <CardHeader>
             <CardTitle className="text-white">Items</CardTitle>
             <CardDescription className="text-white/80">
@@ -196,14 +259,30 @@ const Inventory = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/20">
-                    <TableHead className="text-white/90 min-w-[120px]">Name</TableHead>
-                    <TableHead className="text-white/90 min-w-[100px]">SKU</TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden sm:table-cell">Category</TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">Supplier</TableHead>
-                    <TableHead className="text-white/90 min-w-[80px]">Quantity</TableHead>
-                    <TableHead className="text-white/90 min-w-[80px] hidden sm:table-cell">Price</TableHead>
-                    <TableHead className="text-white/90 min-w-[100px]">Status</TableHead>
-                    <TableHead className="text-white/90 min-w-[120px]">Actions</TableHead>
+                    <TableHead className="text-white/90 min-w-[120px]">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[100px]">
+                      SKU
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[100px] hidden sm:table-cell">
+                      Category
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
+                      Supplier
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[80px]">
+                      Quantity
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[80px] hidden sm:table-cell">
+                      Price
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[100px]">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-white/90 min-w-[120px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -214,25 +293,46 @@ const Inventory = () => {
                           <Package className="w-12 h-12 text-white/40" />
                           <p className="text-white/60">No items found</p>
                           <p className="text-sm text-white/40">
-                            {searchTerm || selectedCategory !== 'all' || selectedSupplier !== 'all'
-                              ? 'Try adjusting your filters'
-                              : 'Add your first inventory item to get started'
-                            }
+                            {searchTerm ||
+                            selectedCategory !== "all" ||
+                            selectedSupplier !== "all"
+                              ? "Try adjusting your filters"
+                              : "Add your first inventory item to get started"}
                           </p>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredItems.map((item) => {
-                      const status = getStockStatus(item.quantity || 0, item.min_stock_level || 0);
+                      const status = getStockStatus(
+                        item.quantity || 0,
+                        item.min_stock_level || 0
+                      );
                       return (
-                        <TableRow key={item.id} className="border-white/20 hover:bg-white/5">
-                          <TableCell className="font-medium text-white text-sm md:text-base">{item.name}</TableCell>
-                          <TableCell className="font-mono text-xs md:text-sm text-white/80">{item.sku}</TableCell>
-                          <TableCell className="text-white/80 text-sm hidden sm:table-cell">{item.categories?.name || '-'}</TableCell>
-                          <TableCell className="text-white/80 text-sm hidden md:table-cell">{item.suppliers?.name || '-'}</TableCell>
+                        <TableRow
+                          key={item.id}
+                          className="border-white/20 hover:bg-white/5"
+                        >
+                          <TableCell className="font-medium text-white text-sm md:text-base">
+                            {item.name}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs md:text-sm text-white/80">
+                            {item.sku}
+                          </TableCell>
+                          <TableCell className="text-white/80 text-sm hidden sm:table-cell">
+                            {item.categories?.name || "-"}
+                          </TableCell>
+                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
+                            {item.suppliers?.name || "-"}
+                          </TableCell>
                           <TableCell className="text-white text-sm">
-                            <span className={item.quantity === 0 ? 'text-red-400 font-semibold' : ''}>
+                            <span
+                              className={
+                                item.quantity === 0
+                                  ? "text-red-400 font-semibold"
+                                  : ""
+                              }
+                            >
                               {item.quantity || 0}
                             </span>
                             {item.min_stock_level && (
@@ -241,27 +341,33 @@ const Inventory = () => {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell className="text-white text-sm hidden sm:table-cell">${(item.price || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-white text-sm hidden sm:table-cell">
+                            ${(item.price || 0).toFixed(2)}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={status.variant} className="text-xs">{status.label}</Badge>
+                            <Badge variant={status.variant} className="text-xs">
+                              {status.label}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 md:gap-2">
                               {isMobile ? (
                                 <Drawer>
                                   <DrawerTrigger asChild>
-                                    <Button 
-                                      variant="outline" 
+                                    <Button
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => setEditingItem(item)}
-                                      className="border-white/30 text-white hover:bg-white hover:text-primary p-2"
+                                      className="border-white/30 bg-primary text-white hover:bg-white hover:text-primary p-2"
                                     >
                                       <Edit className="w-3 h-3 md:w-4 md:h-4" />
                                     </Button>
                                   </DrawerTrigger>
                                   <DrawerContent className="glass border-white/20 backdrop-blur-md">
                                     <DrawerHeader>
-                                      <DrawerTitle className="text-white">Edit Item</DrawerTitle>
+                                      <DrawerTitle className="text-white">
+                                        Edit Item
+                                      </DrawerTitle>
                                     </DrawerHeader>
                                     <div className="p-4">
                                       <EditItemForm />
@@ -271,18 +377,20 @@ const Inventory = () => {
                               ) : (
                                 <Dialog>
                                   <DialogTrigger asChild>
-                                    <Button 
-                                      variant="outline" 
+                                    <Button
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => setEditingItem(item)}
-                                      className="border-white/30 text-white hover:bg-white hover:text-primary"
+                                      className="border-white/30 text-white bg-primary hover:bg-white hover:text-primary"
                                     >
                                       <Edit className="w-4 h-4" />
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="max-w-2xl glass border-white/20 backdrop-blur-md">
                                     <DialogHeader>
-                                      <DialogTitle className="text-white">Edit Item</DialogTitle>
+                                      <DialogTitle className="text-white">
+                                        Edit Item
+                                      </DialogTitle>
                                     </DialogHeader>
                                     <EditItemForm />
                                   </DialogContent>
@@ -293,7 +401,7 @@ const Inventory = () => {
                                 size="sm"
                                 onClick={() => handleDelete(item.id, item.name)}
                                 disabled={isDeleting}
-                                className="border-white/30 text-white hover:bg-red-500 hover:text-white p-2"
+                                className="border-white/30  text-red-500 hover:bg-red-500 hover:text-white p-2"
                               >
                                 <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                               </Button>
