@@ -1,69 +1,95 @@
-import { useState } from 'react';
-import { useSales } from '@/hooks/useSales';
-import { useSettings } from '@/hooks/useSettings';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Download, Printer, Search, Receipt, DollarSign, Sparkles } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { downloadInvoice, printInvoice } from '@/utils/htmlInvoiceGenerator';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useSales } from "@/hooks/useSales";
+import { useSettings } from "@/hooks/useSettings";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Download,
+  Printer,
+  Search,
+  Receipt,
+  DollarSign,
+  Sparkles,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { downloadInvoice, printInvoice } from "@/utils/htmlInvoiceGenerator";
+import { useToast } from "@/hooks/use-toast";
 
 const Sales = () => {
   const { sales, salesLoading } = useSales();
   const { getSetting } = useSettings();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [isPrinting, setIsPrinting] = useState<string | null>(null);
 
-  const companyInfo = getSetting('company_info')?.setting_value || {};
-  const invoiceSettings = getSetting('invoice_settings')?.setting_value || {};
+  const companyInfo = getSetting("company_info")?.setting_value || {};
+  const invoiceSettings = getSetting("invoice_settings")?.setting_value || {};
 
-  const filteredSales = sales.filter(sale => 
-    sale.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (sale.customer_name && sale.customer_name.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredSales = sales.filter(
+    (sale) =>
+      sale.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sale.customer_name &&
+        sale.customer_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const totalRevenue = sales.reduce((sum, sale) => sum + parseFloat(sale.total_amount.toString()), 0);
+  const totalRevenue = sales.reduce(
+    (sum, sale) => sum + parseFloat(sale.total_amount.toString()),
+    0
+  );
 
   const validateSaleForInvoice = (sale: any): string | null => {
-    if (!sale) return 'Sale data is missing';
-    if (!sale.invoice_number) return 'Invoice number is missing';
-    if (!sale.id) return 'Sale ID is missing';
-    if (!sale.created_at) return 'Sale date is missing';
-    if (sale.total_amount === undefined || sale.total_amount === null) return 'Total amount is missing';
+    if (!sale) return "Sale data is missing";
+    if (!sale.invoice_number) return "Invoice number is missing";
+    if (!sale.id) return "Sale ID is missing";
+    if (!sale.created_at) return "Sale date is missing";
+    if (sale.total_amount === undefined || sale.total_amount === null)
+      return "Total amount is missing";
     return null;
   };
 
   const handleDownloadInvoice = async (sale: any) => {
     try {
       setIsDownloading(sale.id);
-      
+
       // Validate sale data
       const validationError = validateSaleForInvoice(sale);
       if (validationError) {
         throw new Error(validationError);
       }
-      
-      console.log('Downloading invoice for sale:', {
+
+      console.log("Downloading invoice for sale:", {
         id: sale.id,
         invoice_number: sale.invoice_number,
-        items_count: sale.sale_items?.length || 0
+        items_count: sale.sale_items?.length || 0,
       });
-      
+
       await downloadInvoice(sale, companyInfo, invoiceSettings);
-      
+
       toast({
         title: "Success",
         description: `Invoice ${sale.invoice_number} downloaded successfully!`,
       });
     } catch (error: any) {
-      console.error('Download error:', error);
-      
-      const errorMessage = error?.message || 'Failed to download invoice';
-      
+      console.error("Download error:", error);
+
+      const errorMessage = error?.message || "Failed to download invoice";
+
       toast({
         title: "Download Failed",
         description: errorMessage,
@@ -77,30 +103,30 @@ const Sales = () => {
   const handlePrintInvoice = async (sale: any) => {
     try {
       setIsPrinting(sale.id);
-      
+
       // Validate sale data
       const validationError = validateSaleForInvoice(sale);
       if (validationError) {
         throw new Error(validationError);
       }
-      
-      console.log('Printing invoice for sale:', {
+
+      console.log("Printing invoice for sale:", {
         id: sale.id,
         invoice_number: sale.invoice_number,
-        items_count: sale.sale_items?.length || 0
+        items_count: sale.sale_items?.length || 0,
       });
-      
+
       await printInvoice(sale, companyInfo, invoiceSettings);
-      
+
       toast({
         title: "Success",
         description: `Invoice ${sale.invoice_number} sent to printer!`,
       });
     } catch (error: any) {
-      console.error('Print error:', error);
-      
-      const errorMessage = error?.message || 'Failed to print invoice';
-      
+      console.error("Print error:", error);
+
+      const errorMessage = error?.message || "Failed to print invoice";
+
       toast({
         title: "Print Failed",
         description: errorMessage,
@@ -113,11 +139,11 @@ const Sales = () => {
 
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
-      case 'paid':
+      case "paid":
         return <Badge variant="default">Paid</Badge>;
-      case 'pending':
+      case "pending":
         return <Badge variant="secondary">Pending</Badge>;
-      case 'overdue':
+      case "overdue":
         return <Badge variant="destructive">Overdue</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -152,21 +178,28 @@ const Sales = () => {
               <Receipt className="w-8 h-8 animate-float" />
               Sales Management
             </h1>
-            <p className="text-white/80">View and manage your sales transactions</p>
+            <p className="text-white/80">
+              View and manage your sales transactions
+            </p>
           </div>
           <Card className="w-64 glass border-white/20">
             <CardContent className="flex items-center p-4">
               <DollarSign className="w-8 h-8 text-green-400 mr-3 animate-pulse" />
               <div>
                 <p className="text-sm text-white/80">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">${totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-white">
+                  ${totalRevenue.toFixed(2)}
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Search */}
-        <Card className="glass border-white/20 hover-lift animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <Card
+          className="glass border-white/20 hover-lift animate-slide-up"
+          style={{ animationDelay: "200ms" }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Search className="w-4 h-4" />
@@ -193,7 +226,10 @@ const Sales = () => {
         </Card>
 
         {/* Sales Table */}
-        <Card className="glass border-white/20 hover-lift animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <Card
+          className="glass border-white/20 hover-lift animate-slide-up"
+          style={{ animationDelay: "300ms" }}
+        >
           <CardHeader>
             <CardTitle className="text-white">Sales History</CardTitle>
             <CardDescription className="text-white/80">
@@ -223,29 +259,48 @@ const Sales = () => {
                           <Receipt className="w-12 h-12 text-white/40" />
                           <p className="text-white/60">No sales found</p>
                           <p className="text-sm text-white/40">
-                            {searchTerm ? 'Try adjusting your search' : 'Sales will appear here once you make transactions'}
+                            {searchTerm
+                              ? "Try adjusting your search"
+                              : "Sales will appear here once you make transactions"}
                           </p>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredSales.map((sale) => (
-                      <TableRow key={sale.id} className="border-white/20 hover:bg-white/5">
-                        <TableCell className="font-mono text-white">{sale.invoice_number}</TableCell>
-                        <TableCell className="text-white">{sale.customer_name || 'Walk-in Customer'}</TableCell>
-                        <TableCell className="text-white/80">{new Date(sale.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-white/80">{sale.sale_items?.length || 0} items</TableCell>
-                        <TableCell className="font-semibold text-white">${parseFloat(sale.total_amount.toString()).toFixed(2)}</TableCell>
-                        <TableCell className="capitalize text-white/80">{sale.payment_method || 'N/A'}</TableCell>
-                        <TableCell>{getPaymentStatusBadge(sale.payment_status)}</TableCell>
+                      <TableRow
+                        key={sale.id}
+                        className="border-white/20 hover:bg-white/5"
+                      >
+                        <TableCell className="font-mono text-white">
+                          {sale.invoice_number}
+                        </TableCell>
+                        <TableCell className="text-white">
+                          {sale.customer_name || "Walk-in Customer"}
+                        </TableCell>
+                        <TableCell className="text-white/80">
+                          {new Date(sale.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-white/80">
+                          {sale.sale_items?.length || 0} items
+                        </TableCell>
+                        <TableCell className="font-semibold text-white">
+                          ${parseFloat(sale.total_amount.toString()).toFixed(2)}
+                        </TableCell>
+                        <TableCell className="capitalize text-white/80">
+                          {sale.payment_method || "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          {getPaymentStatusBadge(sale.payment_status)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDownloadInvoice(sale)}
                               disabled={isDownloading === sale.id}
-                              className="border-white/30 text-white hover:bg-white hover:text-primary"
+                              className="border-white/30 text-white bg-primary hover:text-primary hover:text-white"
                               title="Download Invoice PDF"
                             >
                               {isDownloading === sale.id ? (
@@ -254,12 +309,12 @@ const Sales = () => {
                                 <Download className="w-4 h-4" />
                               )}
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handlePrintInvoice(sale)}
                               disabled={isPrinting === sale.id}
-                              className="border-white/30 text-white hover:bg-white hover:text-primary"
+                              className="border-white/30 bg-primary text-white hover:bg-white hover:text-primary"
                               title="Print Invoice"
                             >
                               {isPrinting === sale.id ? (

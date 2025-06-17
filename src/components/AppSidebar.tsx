@@ -1,6 +1,13 @@
-
 import React from "react";
-import { BarChart3, Package, Users, Settings, LogOut, ShoppingCart, Receipt } from "lucide-react";
+import {
+  BarChart3,
+  Package,
+  Users,
+  Settings,
+  LogOut,
+  ShoppingCart,
+  Receipt,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +28,7 @@ const navigation = [
   { name: "Inventory", href: "/inventory", icon: Package },
   { name: "POS", href: "/pos", icon: ShoppingCart },
   { name: "Sales", href: "/sales", icon: Receipt },
-  { name: "Users", href: "/users", icon: Users },
+  // { name: "Users", href: "/users", icon: Users },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -35,7 +42,9 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            <span className="text-xl font-bold text-primary">Inventory Manager</span>
+            <span className="text-xl font-bold text-primary">
+              Inventory Manager
+            </span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
