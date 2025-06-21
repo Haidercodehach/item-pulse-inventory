@@ -188,7 +188,7 @@ const Sales = () => {
               <div>
                 <p className="text-sm text-white/80">Total Revenue</p>
                 <p className="text-2xl font-bold text-white">
-                  ${totalRevenue.toFixed(2)}
+                  €{totalRevenue.toFixed(2)}
                 </p>
               </div>
             </CardContent>
@@ -285,7 +285,7 @@ const Sales = () => {
                           {sale.sale_items?.length || 0} items
                         </TableCell>
                         <TableCell className="font-semibold text-white">
-                          ${parseFloat(sale.total_amount.toString()).toFixed(2)}
+                          €{parseFloat(sale.total_amount.toString()).toFixed(2)}
                         </TableCell>
                         <TableCell className="capitalize text-white/80">
                           {sale.payment_method || "N/A"}

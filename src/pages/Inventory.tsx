@@ -342,7 +342,7 @@ const Inventory = () => {
                             )}
                           </TableCell>
                           <TableCell className="text-white text-sm hidden sm:table-cell">
-                            ${(item.price || 0).toFixed(2)}
+                            €{(item.price || 0).toFixed(2)}
                           </TableCell>
                           <TableCell>
                             <Badge variant={status.variant} className="text-xs">

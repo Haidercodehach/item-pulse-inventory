@@ -252,7 +252,7 @@ const POSSystem = () => {
                     <p className="text-xs text-white/70 mb-3">{item.sku}</p>
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-lg text-white">
-                        Rs{(item.price || 0).toFixed(2)}
+                        €{(item.price || 0).toFixed(2)}
                       </span>
                       <Badge
                         variant={
@@ -262,7 +262,7 @@ const POSSystem = () => {
                             ? "secondary"
                             : "destructive"
                         }
-                        className={`rounded-full mx-2 px-3 py-1 text-xs font-semibold shadow-sm border Rs{
+                        className={`rounded-full mx-2 px-3 py-1 text-xs font-semibold shadow-sm border €{
                           item.quantity > 10
                             ? "bg-green-100 $text-green-800 border-green-200"
                             : item.quantity > 0
@@ -361,7 +361,7 @@ const POSSystem = () => {
                           <Trash2 className="w-3 h-3" />
                         </Button>
                         <div className="text-base font-bold text-white min-w-[70px] text-right">
-                          Rs{item.total.toFixed(2)}
+                          €{item.total.toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -375,19 +375,19 @@ const POSSystem = () => {
                 <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 space-y-2.5 shadow-lg">
                   <div className="flex justify-between text-white/90">
                     <span>Subtotal:</span>
-                    <span>Rs{subtotal.toFixed(2)}</span>
+                    <span>€{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-white/90">
                     <span>Discount:</span>
-                    <span>-Rs{discountAmount.toFixed(2)}</span>
+                    <span>-€{discountAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-white/90">
                     <span>Tax ({(taxRate * 100).toFixed(2)}%):</span>
-                    <span>Rs{taxAmount.toFixed(2)}</span>
+                    <span>€{taxAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-white border-t border-white/20 pt-2.5 mt-2">
                     <span>Total:</span>
-                    <span>Rs{total.toFixed(2)}</span>
+                    <span>€{total.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -406,7 +406,7 @@ const POSSystem = () => {
                     <DialogTrigger asChild>
                       <Button className="w-full bg-gradient-warm hover:opacity-90 text-white font-semibold py-3 shadow-lg rounded-lg transition-all hover:shadow-xl">
                         <Receipt className="w-4 h-4 mr-2" />
-                        Checkout - Rs{total.toFixed(2)}
+                        Checkout - €{total.toFixed(2)}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl p-6">
@@ -514,7 +514,7 @@ const POSSystem = () => {
 
                         <div className="bg-gradient-warm p-4 rounded-lg text-white shadow-md">
                           <div className="text-lg font-bold text-center">
-                            Total: Rs{total.toFixed(2)}
+                            Total: €{total.toFixed(2)}
                           </div>
                         </div>
 
