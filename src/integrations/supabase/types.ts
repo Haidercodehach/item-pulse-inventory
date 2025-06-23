@@ -266,7 +266,7 @@ export type Database = {
           created_by: string | null
           customer_address: string | null
           customer_email: string | null
-          customer_name: string | null
+          customer_name: string
           customer_phone: string | null
           discount_amount: number
           id: string
@@ -285,7 +285,7 @@ export type Database = {
           created_by?: string | null
           customer_address?: string | null
           customer_email?: string | null
-          customer_name?: string | null
+          customer_name: string
           customer_phone?: string | null
           discount_amount?: number
           id?: string
@@ -304,7 +304,7 @@ export type Database = {
           created_by?: string | null
           customer_address?: string | null
           customer_email?: string | null
-          customer_name?: string | null
+          customer_name?: string
           customer_phone?: string | null
           discount_amount?: number
           id?: string

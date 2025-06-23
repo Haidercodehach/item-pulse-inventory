@@ -70,8 +70,8 @@ const POSSystem = () => {
 
   const invoiceSettings = getSetting("invoice_settings");
   const taxRate = invoiceSettings?.setting_value
-    ? (invoiceSettings.setting_value as { tax_rate: number }).tax_rate || 0.0875
-    : 0.0875;
+    ? (invoiceSettings.setting_value as { tax_rate: number }).tax_rate || 0.22
+    : 0.22;
 
   const filteredItems = items.filter(
     (item) =>
@@ -155,8 +155,8 @@ const POSSystem = () => {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-  const taxAmount = (subtotal - discountAmount) * taxRate;
-  const total = subtotal - discountAmount + taxAmount;
+  const taxAmount = 0;
+  const total = subtotal - discountAmount;
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -167,8 +167,8 @@ const POSSystem = () => {
       customer_phone: customerInfo.phone || null,
       customer_address: customerInfo.address || null,
       subtotal: subtotal.toFixed(2),
-      tax_rate: taxRate.toString(),
-      tax_amount: taxAmount.toFixed(2),
+      tax_rate: taxRate.toString(), // Save 22% tax rate for records
+      tax_amount: taxAmount.toFixed(2), // Save 0.00 as tax amount
       discount_amount: discountAmount.toFixed(2),
       total_amount: total.toFixed(2),
       payment_method: paymentMethod,
@@ -262,12 +262,12 @@ const POSSystem = () => {
                             ? "secondary"
                             : "destructive"
                         }
-                        className={`rounded-full mx-2 px-3 py-1 text-xs font-semibold shadow-sm border €{
+                        className={`rounded-full mx-2 px-3 py-1 text-xs font-semibold shadow-sm border ${
                           item.quantity > 10
-                            ? "bg-green-100 $text-green-800 border-green-200"
+                            ? "bg-green-100 text-green-800 border-green-200"
                             : item.quantity > 0
-                            ? "bg-yellow-100 $text-yellow-800 border-yellow-200"
-                            : "bg-red-100 $text-red-800 border-red-200"
+                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                            : "bg-red-100 text-red-800 border-red-200"
                         }`}
                       >
                         Stock: {item.quantity || 0}
@@ -382,7 +382,7 @@ const POSSystem = () => {
                     <span>-€{discountAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-white/90">
-                    <span>Tax ({(taxRate * 100).toFixed(2)}%):</span>
+                    <span>Tax ({(taxRate * 100).toFixed(0)}%):</span>
                     <span>€{taxAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-white border-t border-white/20 pt-2.5 mt-2">
