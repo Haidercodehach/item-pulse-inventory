@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -154,28 +153,23 @@ export const useInventory = () => {
     },
   });
 
-  // Delete item mutation - Fixed to handle the deletion properly
+  // Delete item mutation - Updated to allow deletion of sold items with cascading deletions
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
       console.log('Attempting to delete item with ID:', id);
       
-      // Check if item has been sold by looking at sale_items table
-      const { data: saleItems, error: checkError } = await supabase
+      // Delete sale_items that reference this inventory item first
+      const { error: saleItemsError } = await supabase
         .from('sale_items')
-        .select('id')
-        .eq('item_id', id)
-        .limit(1);
+        .delete()
+        .eq('item_id', id);
       
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking sale items:', checkError);
-        throw new Error('Failed to check item dependencies');
+      if (saleItemsError) {
+        console.error('Error deleting sale items:', saleItemsError);
+        throw new Error('Failed to delete related sale items');
       }
       
-      if (saleItems && saleItems.length > 0) {
-        throw new Error('Cannot delete item that has been sold. Please contact administrator.');
-      }
-      
-      // Delete inventory transactions first (they reference the item)
+      // Delete inventory transactions that reference this item
       const { error: transactionError } = await supabase
         .from('inventory_transactions')
         .delete()
@@ -186,7 +180,7 @@ export const useInventory = () => {
         throw new Error('Failed to delete item transactions');
       }
       
-      // Then delete the item
+      // Finally delete the inventory item
       const { error: deleteError } = await supabase
         .from('inventory_items')
         .delete()
@@ -197,11 +191,12 @@ export const useInventory = () => {
         throw deleteError;
       }
       
-      console.log('Item deleted successfully');
+      console.log('Item and all related records deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
       toast({
         title: "Success",
         description: "Item deleted successfully!",
