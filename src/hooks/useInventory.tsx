@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -7,7 +8,6 @@ type InventoryItem = Database['public']['Tables']['inventory_items']['Row'];
 type InventoryItemInsert = Database['public']['Tables']['inventory_items']['Insert'];
 type InventoryItemUpdate = Database['public']['Tables']['inventory_items']['Update'];
 type Category = Database['public']['Tables']['categories']['Row'];
-type Supplier = Database['public']['Tables']['suppliers']['Row'];
 type Transaction = Database['public']['Tables']['inventory_transactions']['Row'];
 
 export const useInventory = () => {
@@ -22,6 +22,7 @@ export const useInventory = () => {
   } = useQuery({
     queryKey: ['inventory-items'],
     queryFn: async () => {
+      console.log('Fetching inventory items...');
       const { data, error } = await supabase
         .from('inventory_items')
         .select(`
@@ -30,7 +31,11 @@ export const useInventory = () => {
         `)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching inventory items:', error);
+        throw error;
+      }
+      console.log('Inventory items fetched successfully:', data);
       return data as (InventoryItem & {
         categories: { name: string } | null;
       })[];
@@ -44,17 +49,22 @@ export const useInventory = () => {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      console.log('Categories fetched successfully:', data);
       return data as Category[];
     },
   });
 
-  // Fetch suppliers (keeping empty array for compatibility)
+  // Remove suppliers entirely as they don't exist in the current schema
   const suppliers: any[] = [];
   const suppliersLoading = false;
 
@@ -65,6 +75,7 @@ export const useInventory = () => {
   } = useQuery({
     queryKey: ['inventory-transactions'],
     queryFn: async () => {
+      console.log('Fetching inventory transactions...');
       const { data, error } = await supabase
         .from('inventory_transactions')
         .select(`
@@ -74,7 +85,11 @@ export const useInventory = () => {
         .order('created_at', { ascending: false })
         .limit(100);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching inventory transactions:', error);
+        throw error;
+      }
+      console.log('Inventory transactions fetched successfully:', data);
       return data as (Transaction & {
         inventory_items: { name: string; sku: string } | null;
       })[];
