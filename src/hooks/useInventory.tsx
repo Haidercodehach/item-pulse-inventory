@@ -26,15 +26,13 @@ export const useInventory = () => {
         .from('inventory_items')
         .select(`
           *,
-          categories(name),
-          suppliers(name)
+          categories(name)
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as (InventoryItem & {
         categories: { name: string } | null;
-        suppliers: { name: string } | null;
       })[];
     },
   });
@@ -56,22 +54,9 @@ export const useInventory = () => {
     },
   });
 
-  // Fetch suppliers
-  const {
-    data: suppliers = [],
-    isLoading: suppliersLoading
-  } = useQuery({
-    queryKey: ['suppliers'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      return data as Supplier[];
-    },
-  });
+  // Fetch suppliers (keeping empty array for compatibility)
+  const suppliers: any[] = [];
+  const suppliersLoading = false;
 
   // Fetch transactions
   const {
@@ -110,9 +95,10 @@ export const useInventory = () => {
       const cleanItem = {
         ...item,
         category_id: item.category_id || null,
-        supplier_id: item.supplier_id || null,
-        description: item.description || null,
-        barcode: item.barcode || null,
+        color: item.color || null,
+        condition: item.condition || null,
+        storage: item.storage || null,
+        ram: item.ram || null,
         quantity: item.quantity || 0,
         min_stock_level: item.min_stock_level || 0,
         price: item.price || 0,
@@ -288,7 +274,7 @@ export const useInventory = () => {
     categories,
     suppliers,
     transactions,
-    isLoading: itemsLoading || categoriesLoading || suppliersLoading,
+    isLoading: itemsLoading || categoriesLoading,
     itemsLoading,
     categoriesLoading,
     suppliersLoading,

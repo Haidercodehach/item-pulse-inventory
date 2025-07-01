@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import {
@@ -59,7 +60,6 @@ const Inventory = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedSupplier, setSelectedSupplier] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -67,15 +67,13 @@ const Inventory = () => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.description &&
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      (item.color && item.color.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.condition && item.condition.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === "all" || item.category_id === selectedCategory;
-    const matchesSupplier =
-      selectedSupplier === "all" || item.supplier_id === selectedSupplier;
 
-    return matchesSearch && matchesCategory && matchesSupplier;
+    return matchesSearch && matchesCategory;
   });
 
   const handleDelete = async (itemId: string, itemName: string) => {
@@ -193,7 +191,7 @@ const Inventory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                 <Input
@@ -215,22 +213,6 @@ const Inventory = () => {
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={selectedSupplier}
-                onValueChange={setSelectedSupplier}
-              >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
-                  <SelectValue placeholder="All Suppliers" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
-                  <SelectItem value="all">All Suppliers</SelectItem>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -269,7 +251,7 @@ const Inventory = () => {
                       Category
                     </TableHead>
                     <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
-                      Supplier
+                      Color
                     </TableHead>
                     <TableHead className="text-white/90 min-w-[80px]">
                       Quantity
@@ -293,9 +275,7 @@ const Inventory = () => {
                           <Package className="w-12 h-12 text-white/40" />
                           <p className="text-white/60">No items found</p>
                           <p className="text-sm text-white/40">
-                            {searchTerm ||
-                            selectedCategory !== "all" ||
-                            selectedSupplier !== "all"
+                            {searchTerm || selectedCategory !== "all"
                               ? "Try adjusting your filters"
                               : "Add your first inventory item to get started"}
                           </p>
@@ -323,7 +303,7 @@ const Inventory = () => {
                             {item.categories?.name || "-"}
                           </TableCell>
                           <TableCell className="text-white/80 text-sm hidden md:table-cell">
-                            {item.suppliers?.name || "-"}
+                            {item.color || "-"}
                           </TableCell>
                           <TableCell className="text-white text-sm">
                             <span

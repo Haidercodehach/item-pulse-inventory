@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -27,14 +26,15 @@ import { Loader2 } from "lucide-react";
 const itemSchema = z.object({
   name: z.string().min(1, "Name is required"),
   sku: z.string().min(1, "SKU is required"),
-  description: z.string().optional(),
   category_id: z.string().optional(),
-  supplier_id: z.string().optional(),
+  color: z.string().optional(),
+  condition: z.string().optional(),
+  storage: z.string().optional(),
+  ram: z.string().optional(),
   quantity: z.number().min(0, "Quantity cannot be negative"),
   min_stock_level: z.number().min(0, "Minimum stock level cannot be negative"),
   price: z.number().min(0, "Price cannot be negative"),
   cost: z.number().min(0, "Cost cannot be negative"),
-  barcode: z.string().optional(),
 });
 
 type ItemFormData = z.infer<typeof itemSchema>;
@@ -50,7 +50,6 @@ const ItemForm = ({
   item,
   onSuccess,
   categories,
-  suppliers,
 }: ItemFormProps) => {
   const { createItem, updateItem, isCreating, isUpdating } = useInventory();
 
@@ -59,14 +58,15 @@ const ItemForm = ({
     defaultValues: {
       name: "",
       sku: "",
-      description: "",
       category_id: "",
-      supplier_id: "",
+      color: "",
+      condition: "",
+      storage: "",
+      ram: "",
       quantity: 0,
       min_stock_level: 0,
       price: 0,
       cost: 0,
-      barcode: "",
     },
   });
 
@@ -76,14 +76,15 @@ const ItemForm = ({
       form.reset({
         name: item.name || "",
         sku: item.sku || "",
-        description: item.description || "",
         category_id: item.category_id || "",
-        supplier_id: item.supplier_id || "",
+        color: item.color || "",
+        condition: item.condition || "",
+        storage: item.storage || "",
+        ram: item.ram || "",
         quantity: item.quantity || 0,
         min_stock_level: item.min_stock_level || 0,
         price: item.price || 0,
         cost: item.cost || 0,
-        barcode: item.barcode || "",
       });
     }
   }, [item, form]);
@@ -96,14 +97,15 @@ const ItemForm = ({
       const itemData = {
         name: data.name.trim(),
         sku: data.sku.trim().toUpperCase(), // Standardize SKU format
-        description: data.description?.trim() || undefined,
         category_id: data.category_id || undefined,
-        supplier_id: data.supplier_id || undefined,
+        color: data.color?.trim() || undefined,
+        condition: data.condition?.trim() || undefined,
+        storage: data.storage?.trim() || undefined,
+        ram: data.ram?.trim() || undefined,
         quantity: Number(data.quantity) || 0,
         min_stock_level: Number(data.min_stock_level) || 0,
         price: Number(data.price) || 0,
         cost: Number(data.cost) || 0,
-        barcode: data.barcode?.trim() || undefined,
       };
 
       console.log('Processed item data:', itemData);
@@ -191,24 +193,71 @@ const ItemForm = ({
 
           <FormField
             control={form.control}
-            name="supplier_id"
+            name="color"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white">Supplier</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Select supplier" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel className="text-white">Color</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Item color" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="condition"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Condition</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Item condition" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="storage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Storage</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Storage capacity" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="ram"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">RAM</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="RAM capacity" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
