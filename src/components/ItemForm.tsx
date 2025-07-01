@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +29,7 @@ const itemSchema = z.object({
   color: z.string().optional(),
   condition: z.string().optional(),
   storage: z.string().optional(),
-  ram: z.string().optional(),
+  // ram: z.string().optional(),
   quantity: z.number().min(0, "Quantity cannot be negative"),
   min_stock_level: z.number().min(0, "Minimum stock level cannot be negative"),
   price: z.number().min(0, "Price cannot be negative"),
@@ -46,11 +45,7 @@ interface ItemFormProps {
   suppliers: any[];
 }
 
-const ItemForm = ({
-  item,
-  onSuccess,
-  categories,
-}: ItemFormProps) => {
+const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
   const { createItem, updateItem, isCreating, isUpdating } = useInventory();
 
   const form = useForm<ItemFormData>({
@@ -62,7 +57,7 @@ const ItemForm = ({
       color: "",
       condition: "",
       storage: "",
-      ram: "",
+      // ram: "",
       quantity: 0,
       min_stock_level: 0,
       price: 0,
@@ -72,7 +67,7 @@ const ItemForm = ({
 
   useEffect(() => {
     if (item) {
-      console.log('Setting form values for item:', item);
+      console.log("Setting form values for item:", item);
       form.reset({
         name: item.name || "",
         sku: item.sku || "",
@@ -80,7 +75,7 @@ const ItemForm = ({
         color: item.color || "",
         condition: item.condition || "",
         storage: item.storage || "",
-        ram: item.ram || "",
+        // ram: item.ram || "",
         quantity: item.quantity || 0,
         min_stock_level: item.min_stock_level || 0,
         price: item.price || 0,
@@ -91,8 +86,8 @@ const ItemForm = ({
 
   const onSubmit = async (data: ItemFormData) => {
     try {
-      console.log('Form submission data:', data);
-      
+      console.log("Form submission data:", data);
+
       // Ensure name and sku are provided as strings, not optional
       const itemData = {
         name: data.name.trim(),
@@ -101,15 +96,15 @@ const ItemForm = ({
         color: data.color?.trim() || undefined,
         condition: data.condition?.trim() || undefined,
         storage: data.storage?.trim() || undefined,
-        ram: data.ram?.trim() || undefined,
+        // ram: data.ram?.trim() || undefined,
         quantity: Number(data.quantity) || 0,
         min_stock_level: Number(data.min_stock_level) || 0,
         price: Number(data.price) || 0,
         cost: Number(data.cost) || 0,
       };
 
-      console.log('Processed item data:', itemData);
-      
+      console.log("Processed item data:", itemData);
+
       if (item) {
         updateItem({ id: item.id, ...itemData });
       } else {
@@ -137,9 +132,9 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">Name *</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Item name" 
-                    {...field} 
+                  <Input
+                    placeholder="Item name"
+                    {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
@@ -155,9 +150,9 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">SKU *</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Stock Keeping Unit" 
-                    {...field} 
+                  <Input
+                    placeholder="Stock Keeping Unit"
+                    {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
@@ -198,9 +193,9 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">Color</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Item color" 
-                    {...field} 
+                  <Input
+                    placeholder="Item color"
+                    {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
@@ -216,9 +211,9 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">Condition</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Item condition" 
-                    {...field} 
+                  <Input
+                    placeholder="Item condition"
+                    {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
@@ -234,9 +229,9 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">Storage</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Storage capacity" 
-                    {...field} 
+                  <Input
+                    placeholder="Storage capacity"
+                    {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
@@ -245,7 +240,7 @@ const ItemForm = ({
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="ram"
             render={({ field }) => (
@@ -261,7 +256,7 @@ const ItemForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <FormField
             control={form.control}
@@ -357,7 +352,11 @@ const ItemForm = ({
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={isLoading} className="bg-white text-primary hover:bg-white/90">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-white text-primary hover:bg-white/90"
+          >
             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {item ? "Update Item" : "Create Item"}
           </Button>

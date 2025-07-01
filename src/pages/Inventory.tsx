@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import {
@@ -67,8 +66,10 @@ const Inventory = () => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.color && item.color.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (item.condition && item.condition.toLowerCase().includes(searchTerm.toLowerCase()));
+      (item.color &&
+        item.color.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.condition &&
+        item.condition.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === "all" || item.category_id === selectedCategory;
@@ -253,9 +254,15 @@ const Inventory = () => {
                     <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
                       Color
                     </TableHead>
-                    <TableHead className="text-white/90 min-w-[80px]">
-                      Quantity
+                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
+                      Condition
                     </TableHead>
+                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
+                      Storage
+                    </TableHead>
+                    {/* <TableHead className="text-white/90 min-w-[80px]">
+                      Quantity
+                    </TableHead> */}
                     <TableHead className="text-white/90 min-w-[80px] hidden sm:table-cell">
                       Price
                     </TableHead>
@@ -305,7 +312,13 @@ const Inventory = () => {
                           <TableCell className="text-white/80 text-sm hidden md:table-cell">
                             {item.color || "-"}
                           </TableCell>
-                          <TableCell className="text-white text-sm">
+                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
+                            {item.condition || "-"}
+                          </TableCell>
+                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
+                            {item.storage || "-"}
+                          </TableCell>
+                          {/* <TableCell className="text-white text-sm">
                             <span
                               className={
                                 item.quantity === 0
@@ -320,7 +333,7 @@ const Inventory = () => {
                                 (min: {item.min_stock_level})
                               </span>
                             )}
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell className="text-white text-sm hidden sm:table-cell">
                             €{(item.price || 0).toFixed(2)}
                           </TableCell>

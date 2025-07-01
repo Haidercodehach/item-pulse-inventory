@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
@@ -12,7 +11,7 @@ const Layout = ({ children }: LayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-vibrant">
         <AppSidebar />
-        <main className="flex-1 py-8 px-6 md:px-10 lg:px-16 bg-transparent">
+        <main className="flex-1 py-8 px-3 md:px-6 lg:px-8 bg-transparent">
           <SidebarTrigger className="md:hidden mb-4" />
           {children}
         </main>
