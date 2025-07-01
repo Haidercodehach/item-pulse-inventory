@@ -136,7 +136,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card
+          {/* <Card
             className="hover-lift animate-slide-up glass border-white/20 backdrop-blur-md"
             style={{ animationDelay: "200ms" }}
           >
@@ -154,7 +154,7 @@ const Dashboard = () => {
               </div>
               <p className="text-xs text-white/70">Current inventory value</p>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card
             className="hover-lift animate-slide-up glass border-white/20 backdrop-blur-md"
