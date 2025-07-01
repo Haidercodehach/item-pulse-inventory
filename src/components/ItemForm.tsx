@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,6 +72,7 @@ const ItemForm = ({
 
   useEffect(() => {
     if (item) {
+      console.log('Setting form values for item:', item);
       form.reset({
         name: item.name || "",
         sku: item.sku || "",
@@ -88,20 +90,24 @@ const ItemForm = ({
 
   const onSubmit = async (data: ItemFormData) => {
     try {
+      console.log('Form submission data:', data);
+      
       // Ensure name and sku are provided as strings, not optional
       const itemData = {
-        name: data.name,
-        sku: data.sku,
-        description: data.description || undefined,
+        name: data.name.trim(),
+        sku: data.sku.trim().toUpperCase(), // Standardize SKU format
+        description: data.description?.trim() || undefined,
         category_id: data.category_id || undefined,
         supplier_id: data.supplier_id || undefined,
-        quantity: data.quantity,
-        min_stock_level: data.min_stock_level,
-        price: data.price,
-        cost: data.cost,
-        barcode: data.barcode || undefined,
+        quantity: Number(data.quantity) || 0,
+        min_stock_level: Number(data.min_stock_level) || 0,
+        price: Number(data.price) || 0,
+        cost: Number(data.cost) || 0,
+        barcode: data.barcode?.trim() || undefined,
       };
 
+      console.log('Processed item data:', itemData);
+      
       if (item) {
         updateItem({ id: item.id, ...itemData });
       } else {
@@ -129,7 +135,11 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Item name" {...field} />
+                  <Input 
+                    placeholder="Item name" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,7 +153,11 @@ const ItemForm = ({
               <FormItem>
                 <FormLabel className="text-white">SKU *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Stock Keeping Unit" {...field} />
+                  <Input 
+                    placeholder="Stock Keeping Unit" 
+                    {...field} 
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -158,7 +172,7 @@ const ItemForm = ({
                 <FormLabel className="text-white">Category</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                   </FormControl>
@@ -183,7 +197,7 @@ const ItemForm = ({
                 <FormLabel className="text-white">Supplier</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
                       <SelectValue placeholder="Select supplier" />
                     </SelectTrigger>
                   </FormControl>
@@ -214,6 +228,7 @@ const ItemForm = ({
                     onChange={(e) =>
                       field.onChange(parseInt(e.target.value) || 0)
                     }
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
                 <FormMessage />
@@ -237,6 +252,7 @@ const ItemForm = ({
                     onChange={(e) =>
                       field.onChange(parseInt(e.target.value) || 0)
                     }
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
                 <FormMessage />
@@ -259,6 +275,7 @@ const ItemForm = ({
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
                 <FormMessage />
@@ -275,54 +292,23 @@ const ItemForm = ({
                 <FormControl>
                   <Input
                     type="number"
-                    step="1"
+                    step="0.01"
                     placeholder="0.00"
                     {...field}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* <FormField
-            control={form.control}
-            name="barcode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Barcode</FormLabel>
-                <FormControl>
-                  <Input placeholder="Barcode/QR code" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
         </div>
 
-        {/* <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Item description..." 
-                  className="min-h-[100px]"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="bg-white text-primary hover:bg-white/90">
             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {item ? "Update Item" : "Create Item"}
           </Button>

@@ -68,54 +68,54 @@ export type Database = {
       }
       inventory_items: {
         Row: {
-          barcode: string | null
           category_id: string | null
+          color: string | null
+          condition: string | null
           cost: number | null
           created_at: string | null
           created_by: string | null
-          description: string | null
           id: string
-          image_url: string | null
           min_stock_level: number | null
           name: string
           price: number | null
           quantity: number | null
+          ram: string | null
           sku: string
-          supplier_id: string | null
+          storage: string | null
           updated_at: string | null
         }
         Insert: {
-          barcode?: string | null
           category_id?: string | null
+          color?: string | null
+          condition?: string | null
           cost?: number | null
           created_at?: string | null
           created_by?: string | null
-          description?: string | null
           id?: string
-          image_url?: string | null
           min_stock_level?: number | null
           name: string
           price?: number | null
           quantity?: number | null
+          ram?: string | null
           sku: string
-          supplier_id?: string | null
+          storage?: string | null
           updated_at?: string | null
         }
         Update: {
-          barcode?: string | null
           category_id?: string | null
+          color?: string | null
+          condition?: string | null
           cost?: number | null
           created_at?: string | null
           created_by?: string | null
-          description?: string | null
           id?: string
-          image_url?: string | null
           min_stock_level?: number | null
           name?: string
           price?: number | null
           quantity?: number | null
+          ram?: string | null
           sku?: string
-          supplier_id?: string | null
+          storage?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -124,13 +124,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_items_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]

@@ -99,13 +99,38 @@ export const useInventory = () => {
   // Create item mutation
   const createItemMutation = useMutation({
     mutationFn: async (item: InventoryItemInsert) => {
+      console.log('Creating item with data:', item);
+      
+      // Ensure required fields are present
+      if (!item.name || !item.sku) {
+        throw new Error('Name and SKU are required fields');
+      }
+      
+      // Clean up the data - remove empty strings and convert to null where appropriate
+      const cleanItem = {
+        ...item,
+        category_id: item.category_id || null,
+        supplier_id: item.supplier_id || null,
+        description: item.description || null,
+        barcode: item.barcode || null,
+        quantity: item.quantity || 0,
+        min_stock_level: item.min_stock_level || 0,
+        price: item.price || 0,
+        cost: item.cost || 0,
+      };
+      
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert(item)
+        .insert(cleanItem)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating item:', error);
+        throw error;
+      }
+      
+      console.log('Item created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -116,9 +141,10 @@ export const useInventory = () => {
       });
     },
     onError: (error: any) => {
+      console.error('Create mutation error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to create item",
         variant: "destructive",
       });
     },
