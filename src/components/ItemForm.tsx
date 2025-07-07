@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Form,
   FormControl,
@@ -29,9 +30,7 @@ const itemSchema = z.object({
   color: z.string().optional(),
   condition: z.string().optional(),
   storage: z.string().optional(),
-  // ram: z.string().optional(),
-  quantity: z.number().min(0, "Quantity cannot be negative"),
-  min_stock_level: z.number().min(0, "Minimum stock level cannot be negative"),
+  status: z.enum(["available", "sold"]),
   price: z.number().min(0, "Price cannot be negative"),
   cost: z.number().min(0, "Cost cannot be negative"),
 });
@@ -57,9 +56,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
       color: "",
       condition: "",
       storage: "",
-      // ram: "",
-      quantity: 0,
-      min_stock_level: 0,
+      status: "available" as const,
       price: 0,
       cost: 0,
     },
@@ -75,9 +72,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         color: item.color || "",
         condition: item.condition || "",
         storage: item.storage || "",
-        // ram: item.ram || "",
-        quantity: item.quantity || 0,
-        min_stock_level: item.min_stock_level || 0,
+        status: item.status || "available",
         price: item.price || 0,
         cost: item.cost || 0,
       });
@@ -96,9 +91,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         color: data.color?.trim() || undefined,
         condition: data.condition?.trim() || undefined,
         storage: data.storage?.trim() || undefined,
-        // ram: data.ram?.trim() || undefined,
-        quantity: Number(data.quantity) || 0,
-        min_stock_level: Number(data.min_stock_level) || 0,
+        status: data.status,
         price: Number(data.price) || 0,
         cost: Number(data.cost) || 0,
       };
@@ -260,44 +253,37 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
 
           <FormField
             control={form.control}
-            name="quantity"
+            name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-white">Quantity *</FormLabel>
+                <FormLabel className="text-white">Status *</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="min_stock_level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-white">
-                  Minimum Stock Level
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="flex flex-row space-x-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="available" 
+                        id="available"
+                        className="border-white text-white"
+                      />
+                      <label htmlFor="available" className="text-white text-sm font-medium cursor-pointer">
+                        Available
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="sold" 
+                        id="sold"
+                        className="border-white text-white"
+                      />
+                      <label htmlFor="sold" className="text-white text-sm font-medium cursor-pointer">
+                        Sold
+                      </label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>

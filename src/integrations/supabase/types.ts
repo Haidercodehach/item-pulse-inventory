@@ -88,6 +88,7 @@ export type Database = {
           price: number | null
           quantity: number | null
           sku: string
+          status: string
           storage: string | null
           supplier_id: number | null
           updated_at: string | null
@@ -108,6 +109,7 @@ export type Database = {
           price?: number | null
           quantity?: number | null
           sku: string
+          status?: string
           storage?: string | null
           supplier_id?: number | null
           updated_at?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           price?: number | null
           quantity?: number | null
           sku?: string
+          status?: string
           storage?: string | null
           supplier_id?: number | null
           updated_at?: string | null
