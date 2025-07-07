@@ -33,24 +33,19 @@ const Dashboard = () => {
   const { items, transactions, isLoading } = useInventory();
 
   const metrics = useMemo(() => {
-    const totalItems = items.length;
+    const totalItems = items.filter(item => item.status === 'available').length;
     const totalValue = items.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0
     );
-    const lowStockItems = items.filter(
-      (item) =>
-        item.quantity !== null &&
-        item.min_stock_level !== null &&
-        item.quantity <= item.min_stock_level
-    ).length;
+    const soldItems = items.filter(item => item.status === 'sold').length;
 
     const recentTransactions = transactions.slice(0, 7).reverse();
 
     return {
       totalItems,
       totalValue,
-      lowStockItems,
+      soldItems,
       recentTransactions,
     };
   }, [items, transactions]);
@@ -162,17 +157,17 @@ const Dashboard = () => {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-white/90">
-                Low Stock Items
+                Total Sold Items
               </CardTitle>
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-white" />
+              <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
+                <TrendingUp className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-200">
-                {metrics.lowStockItems}
+              <div className="text-2xl font-bold text-green-200">
+                {metrics.soldItems}
               </div>
-              <p className="text-xs text-white/70">Items below minimum level</p>
+              <p className="text-xs text-white/70">Items sold</p>
             </CardContent>
           </Card>
 
@@ -305,49 +300,6 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Low Stock Alert */}
-        {metrics.lowStockItems > 0 && (
-          <Card
-            className="border-orange-200/30 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover-lift animate-slide-up glass backdrop-blur-md"
-            style={{ animationDelay: "700ms" }}
-          >
-            <CardHeader>
-              <CardTitle className="text-orange-200 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 animate-bounce" />
-                Low Stock Alert
-              </CardTitle>
-              <CardDescription className="text-orange-300/80">
-                {metrics.lowStockItems} items are running low on stock
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {items
-                  .filter(
-                    (item) =>
-                      item.quantity !== null &&
-                      item.min_stock_level !== null &&
-                      item.quantity <= item.min_stock_level
-                  )
-                  .slice(0, 5)
-                  .map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between text-sm p-3 bg-white/10 rounded-lg animate-slide-in-right backdrop-blur-sm"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <span className="font-medium text-white">
-                        {item.name}
-                      </span>
-                      <span className="text-orange-200 font-semibold">
-                        {item.quantity} / {item.min_stock_level} minimum
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
