@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import {
@@ -133,14 +134,14 @@ const Inventory = () => {
         <div className="absolute bottom-20 right-20 w-40 h-40 bg-white/15 rounded-full animate-pulse-slow"></div>
       </div>
 
-      <div className="relative z-10 space-y-4 md:space-y-6 p-4 md:p-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-cool rounded-xl md:rounded-2xl p-6 md:p-8 text-white animate-slide-up gap-4 sm:gap-0">
+      <div className="relative z-10 space-y-3 md:space-y-6 p-3 md:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-cool rounded-xl md:rounded-2xl p-4 md:p-8 text-white animate-slide-up gap-3 sm:gap-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 md:gap-3">
-              <Package className="w-6 h-6 md:w-8 md:h-8 animate-float" />
+            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 flex items-center gap-2 md:gap-3">
+              <Package className="w-5 h-5 md:w-8 md:h-8 animate-float" />
               Inventory Management
             </h1>
-            <p className="text-white/80 text-sm md:text-base">
+            <p className="text-white/80 text-xs md:text-base">
               Manage your inventory items, track stock levels, and more
             </p>
           </div>
@@ -148,7 +149,7 @@ const Inventory = () => {
           {isMobile ? (
             <Drawer open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DrawerTrigger asChild>
-                <Button className="bg-white text-primary hover:bg-white/90 hover-lift w-full sm:w-auto">
+                <Button className="bg-white text-primary hover:bg-white/90 hover-lift w-full sm:w-auto text-sm">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item
                 </Button>
@@ -185,28 +186,28 @@ const Inventory = () => {
           className="glass border-white/20 hover-lift animate-slide-up"
           style={{ animationDelay: "200ms" }}
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white text-lg">
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="flex items-center gap-2 text-white text-base md:text-lg">
               <Filter className="w-4 h-4" />
               Filters & Search
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                 <Input
                   placeholder="Search items..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 backdrop-blur-sm text-sm"
                 />
               </div>
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm text-sm">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200">
@@ -218,7 +219,7 @@ const Inventory = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="text-sm text-white/80 flex items-center justify-center sm:justify-start bg-white/5 rounded-md px-3 py-2">
+              <div className="text-xs md:text-sm text-white/80 flex items-center justify-center sm:justify-start bg-white/5 rounded-md px-3 py-2">
                 <Package className="w-4 h-4 mr-1" />
                 {filteredItems.length} items found
               </div>
@@ -226,148 +227,211 @@ const Inventory = () => {
           </CardContent>
         </Card>
 
-        {/* Inventory Table */}
+        {/* Inventory Table - Mobile Optimized */}
         <Card
           className="glass border-white/20 hover-lift animate-slide-up"
           style={{ animationDelay: "300ms" }}
         >
-          <CardHeader>
-            <CardTitle className="text-white">Items</CardTitle>
-            <CardDescription className="text-white/80">
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="text-white text-base md:text-lg">Items</CardTitle>
+            <CardDescription className="text-white/80 text-xs md:text-sm">
               Manage your inventory items and track stock levels
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0 sm:p-6">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-white/20">
-                    <TableHead className="text-white/90 min-w-[120px]">
-                      Name
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px]">
-                      SKU
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden sm:table-cell">
-                      Category
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
-                      Color
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
-                      Condition
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px] hidden md:table-cell">
-                      Storage
-                    </TableHead>
-                    {/* <TableHead className="text-white/90 min-w-[80px]">
-                      Quantity
-                    </TableHead> */}
-                    <TableHead className="text-white/90 min-w-[80px] hidden sm:table-cell">
-                      Price
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[100px]">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-white/90 min-w-[120px]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <Package className="w-12 h-12 text-white/40" />
-                          <p className="text-white/60">No items found</p>
-                          <p className="text-sm text-white/40">
-                            {searchTerm || selectedCategory !== "all"
-                              ? "Try adjusting your filters"
-                              : "Add your first inventory item to get started"}
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredItems.map((item) => {
-                      const status = getStockStatus(
-                        item.quantity || 0,
-                        item.min_stock_level || 0
-                      );
-                      return (
-                        <TableRow
-                          key={item.id}
-                          className="border-white/20 hover:bg-white/5"
-                        >
-                          <TableCell className="font-medium text-white text-sm md:text-base">
-                            {item.name}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs md:text-sm text-white/80">
-                            {item.sku}
-                          </TableCell>
-                          <TableCell className="text-white/80 text-sm hidden sm:table-cell">
-                            {item.categories?.name || "-"}
-                          </TableCell>
-                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
-                            {item.color || "-"}
-                          </TableCell>
-                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
-                            {item.condition || "-"}
-                          </TableCell>
-                          <TableCell className="text-white/80 text-sm hidden md:table-cell">
-                            {item.storage || "-"}
-                          </TableCell>
-                          {/* <TableCell className="text-white text-sm">
-                            <span
-                              className={
-                                item.quantity === 0
-                                  ? "text-red-400 font-semibold"
-                                  : ""
-                              }
-                            >
-                              {item.quantity || 0}
-                            </span>
-                            {item.min_stock_level && (
-                              <span className="text-white/60 text-xs ml-1 hidden sm:inline">
-                                (min: {item.min_stock_level})
-                              </span>
-                            )}
-                          </TableCell> */}
-                          <TableCell className="text-white text-sm hidden sm:table-cell">
-                            €{(item.price || 0).toFixed(2)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={status.variant} className="text-xs">
+          <CardContent className="p-0 md:p-6">
+            {isMobile ? (
+              // Mobile Card Layout
+              <div className="space-y-3 p-3">
+                {filteredItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <Package className="w-12 h-12 text-white/40" />
+                      <p className="text-white/60">No items found</p>
+                      <p className="text-sm text-white/40">
+                        {searchTerm || selectedCategory !== "all"
+                          ? "Try adjusting your filters"
+                          : "Add your first inventory item to get started"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  filteredItems.map((item) => {
+                    const status = getStockStatus(
+                      item.quantity || 0,
+                      item.min_stock_level || 0
+                    );
+                    return (
+                      <Card key={item.id} className="bg-white/5 border-white/20">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-white text-sm truncate">
+                                {item.name}
+                              </h3>
+                              <p className="text-xs text-white/70 font-mono">
+                                {item.sku}
+                              </p>
+                            </div>
+                            <Badge variant={status.variant} className="text-xs ml-2">
                               {status.label}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1 md:gap-2">
-                              {isMobile ? (
-                                <Drawer>
-                                  <DrawerTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => setEditingItem(item)}
-                                      className="border-white/30 bg-primary text-white hover:bg-white hover:text-primary p-2"
-                                    >
-                                      <Edit className="w-3 h-3 md:w-4 md:h-4" />
-                                    </Button>
-                                  </DrawerTrigger>
-                                  <DrawerContent className="glass border-white/20 backdrop-blur-md">
-                                    <DrawerHeader>
-                                      <DrawerTitle className="text-white">
-                                        Edit Item
-                                      </DrawerTitle>
-                                    </DrawerHeader>
-                                    <div className="p-4">
-                                      <EditItemForm />
-                                    </div>
-                                  </DrawerContent>
-                                </Drawer>
-                              ) : (
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                            {item.categories?.name && (
+                              <div>
+                                <span className="text-white/60">Category:</span>
+                                <span className="text-white ml-1">{item.categories.name}</span>
+                              </div>
+                            )}
+                            <div>
+                              <span className="text-white/60">Price:</span>
+                              <span className="text-white ml-1">€{(item.price || 0).toFixed(2)}</span>
+                            </div>
+                            {item.color && (
+                              <div>
+                                <span className="text-white/60">Color:</span>
+                                <span className="text-white ml-1">{item.color}</span>
+                              </div>
+                            )}
+                            {item.condition && (
+                              <div>
+                                <span className="text-white/60">Condition:</span>
+                                <span className="text-white ml-1">{item.condition}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Drawer>
+                              <DrawerTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingItem(item)}
+                                  className="flex-1 border-white/30 bg-primary text-white hover:bg-white hover:text-primary text-xs"
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </Button>
+                              </DrawerTrigger>
+                              <DrawerContent className="glass border-white/20 backdrop-blur-md">
+                                <DrawerHeader>
+                                  <DrawerTitle className="text-white">
+                                    Edit Item
+                                  </DrawerTitle>
+                                </DrawerHeader>
+                                <div className="p-4">
+                                  <EditItemForm />
+                                </div>
+                              </DrawerContent>
+                            </Drawer>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(item.id, item.name)}
+                              disabled={isDeleting}
+                              className="flex-1 border-white/30 text-red-400 hover:bg-red-500 hover:text-white text-xs"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
+              </div>
+            ) : (
+              // Desktop Table Layout
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/20">
+                      <TableHead className="text-white/90 min-w-[120px]">
+                        Name
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        SKU
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Category
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Color
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Condition
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Storage
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[80px]">
+                        Price
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Status
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[120px]">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <Package className="w-12 h-12 text-white/40" />
+                            <p className="text-white/60">No items found</p>
+                            <p className="text-sm text-white/40">
+                              {searchTerm || selectedCategory !== "all"
+                                ? "Try adjusting your filters"
+                                : "Add your first inventory item to get started"}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredItems.map((item) => {
+                        const status = getStockStatus(
+                          item.quantity || 0,
+                          item.min_stock_level || 0
+                        );
+                        return (
+                          <TableRow
+                            key={item.id}
+                            className="border-white/20 hover:bg-white/5"
+                          >
+                            <TableCell className="font-medium text-white text-sm">
+                              {item.name}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-white/80">
+                              {item.sku}
+                            </TableCell>
+                            <TableCell className="text-white/80 text-sm">
+                              {item.categories?.name || "-"}
+                            </TableCell>
+                            <TableCell className="text-white/80 text-sm">
+                              {item.color || "-"}
+                            </TableCell>
+                            <TableCell className="text-white/80 text-sm">
+                              {item.condition || "-"}
+                            </TableCell>
+                            <TableCell className="text-white/80 text-sm">
+                              {item.storage || "-"}
+                            </TableCell>
+                            <TableCell className="text-white text-sm">
+                              €{(item.price || 0).toFixed(2)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={status.variant} className="text-xs">
+                                {status.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
                                 <Dialog>
                                   <DialogTrigger asChild>
                                     <Button
@@ -388,25 +452,25 @@ const Inventory = () => {
                                     <EditItemForm />
                                   </DialogContent>
                                 </Dialog>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDelete(item.id, item.name)}
-                                disabled={isDeleting}
-                                className="border-white/30  text-red-500 hover:bg-red-500 hover:text-white p-2"
-                              >
-                                <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDelete(item.id, item.name)}
+                                  disabled={isDeleting}
+                                  className="border-white/30 text-red-500 hover:bg-red-500 hover:text-white"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
