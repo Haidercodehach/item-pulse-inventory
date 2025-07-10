@@ -89,6 +89,7 @@ export type Database = {
           purchase_date: string | null
           quantity: number | null
           sale_date: string | null
+          seller: string | null
           sku: string
           status: string
           storage: string | null
@@ -112,6 +113,7 @@ export type Database = {
           purchase_date?: string | null
           quantity?: number | null
           sale_date?: string | null
+          seller?: string | null
           sku: string
           status?: string
           storage?: string | null
@@ -135,6 +137,7 @@ export type Database = {
           purchase_date?: string | null
           quantity?: number | null
           sale_date?: string | null
+          seller?: string | null
           sku?: string
           status?: string
           storage?: string | null

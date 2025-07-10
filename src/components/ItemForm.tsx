@@ -34,6 +34,7 @@ const itemSchema = z.object({
   color: z.string().optional(),
   condition: z.string().optional(),
   storage: z.string().optional(),
+  seller: z.string().optional(),
   status: z.enum(["available", "sold"]),
   price: z.number().min(0, "Price cannot be negative"),
   cost: z.number().min(0, "Cost cannot be negative"),
@@ -62,6 +63,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
       color: "",
       condition: "",
       storage: "",
+      seller: "",
       status: "available" as const,
       price: 0,
       cost: 0,
@@ -80,6 +82,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         color: item.color || "",
         condition: item.condition || "",
         storage: item.storage || "",
+        seller: item.seller || "",
         status: item.status || "available",
         price: item.price || 0,
         cost: item.cost || 0,
@@ -100,6 +103,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         color: data.color?.trim() || undefined,
         condition: data.condition?.trim() || undefined,
         storage: data.storage?.trim() || undefined,
+        seller: data.seller?.trim() || undefined,
         status: data.status,
         price: Number(data.price) || 0,
         cost: Number(data.cost) || 0,
@@ -235,6 +239,24 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
                 <FormControl>
                   <Input
                     placeholder="Storage capacity"
+                    {...field}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="seller"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Seller</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Company name or Private"
                     {...field}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
