@@ -27,10 +27,11 @@ import {
   DollarSign,
   Sparkles,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 const Dashboard = () => {
   const { items, transactions, isLoading } = useInventory();
+  const [soldItems, setSoldItems] = useState(0);
 
   const metrics = useMemo(() => {
     const totalItems = items.filter(
@@ -51,6 +52,11 @@ const Dashboard = () => {
       recentTransactions,
     };
   }, [items, transactions]);
+
+  useEffect(() => {
+    const soldCount = transactions.length;
+    setSoldItems(soldCount);
+  }, [transactions]);
 
   const categoryData = useMemo(() => {
     const categoryMap = new Map();
@@ -127,9 +133,9 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
-                {metrics.totalItems - transactions.length < 0
+                {metrics.totalItems - soldItems < 0
                   ? 0
-                  : metrics.totalItems - transactions.length}
+                  : metrics.totalItems - soldItems}
               </div>
               <p className="text-xs text-white/70">Unique inventory items</p>
             </CardContent>
@@ -169,7 +175,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-200">
-                {transactions.length}
+                {soldItems}
               </div>
               <p className="text-xs text-white/70">Items sold</p>
             </CardContent>
