@@ -33,6 +33,7 @@ const itemSchema = z.object({
   status: z.enum(["available", "sold"]),
   price: z.number().min(0, "Price cannot be negative"),
   cost: z.number().min(0, "Cost cannot be negative"),
+  quantity: z.number().optional(),
 });
 
 type ItemFormData = z.infer<typeof itemSchema>;
@@ -59,6 +60,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
       status: "available" as const,
       price: 0,
       cost: 0,
+      quantity: 1,
     },
   });
 
@@ -94,6 +96,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         status: data.status,
         price: Number(data.price) || 0,
         cost: Number(data.cost) || 0,
+        quantity: data.status === "available" ? 1 : 0,
       };
 
       console.log("Processed item data:", itemData);
@@ -264,22 +267,28 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
                     className="flex flex-row space-x-6"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem 
-                        value="available" 
+                      <RadioGroupItem
+                        value="available"
                         id="available"
                         className="border-white text-white"
                       />
-                      <label htmlFor="available" className="text-white text-sm font-medium cursor-pointer">
+                      <label
+                        htmlFor="available"
+                        className="text-white text-sm font-medium cursor-pointer"
+                      >
                         Available
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem 
-                        value="sold" 
+                      <RadioGroupItem
+                        value="sold"
                         id="sold"
                         className="border-white text-white"
                       />
-                      <label htmlFor="sold" className="text-white text-sm font-medium cursor-pointer">
+                      <label
+                        htmlFor="sold"
+                        className="text-white text-sm font-medium cursor-pointer"
+                      >
                         Sold
                       </label>
                     </div>

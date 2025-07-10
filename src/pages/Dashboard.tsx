@@ -33,12 +33,14 @@ const Dashboard = () => {
   const { items, transactions, isLoading } = useInventory();
 
   const metrics = useMemo(() => {
-    const totalItems = items.filter(item => item.status === 'available').length;
+    const totalItems = items.filter(
+      (item) => item.status === "available"
+    ).length;
     const totalValue = items.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0
     );
-    const soldItems = items.filter(item => item.status === 'sold').length;
+    const soldItems = items.filter((item) => item.status === "sold").length;
 
     const recentTransactions = transactions.slice(0, 7).reverse();
 
@@ -125,7 +127,9 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
-                {metrics.totalItems}
+                {metrics.totalItems - transactions.length < 0
+                  ? 0
+                  : metrics.totalItems - transactions.length}
               </div>
               <p className="text-xs text-white/70">Unique inventory items</p>
             </CardContent>
@@ -165,13 +169,13 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-200">
-                {metrics.soldItems}
+                {transactions.length}
               </div>
               <p className="text-xs text-white/70">Items sold</p>
             </CardContent>
           </Card>
 
-          <Card
+          {/* <Card
             className="hover-lift animate-slide-up glass border-white/20 backdrop-blur-md"
             style={{ animationDelay: "400ms" }}
           >
@@ -189,7 +193,7 @@ const Dashboard = () => {
               </div>
               <p className="text-xs text-white/70">Total transactions</p>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Charts */}
@@ -299,7 +303,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
-
       </div>
     </div>
   );
