@@ -86,7 +86,9 @@ export type Database = {
           min_stock_level: number | null
           name: string
           price: number | null
+          purchase_date: string | null
           quantity: number | null
+          sale_date: string | null
           sku: string
           status: string
           storage: string | null
@@ -107,7 +109,9 @@ export type Database = {
           min_stock_level?: number | null
           name: string
           price?: number | null
+          purchase_date?: string | null
           quantity?: number | null
+          sale_date?: string | null
           sku: string
           status?: string
           storage?: string | null
@@ -128,7 +132,9 @@ export type Database = {
           min_stock_level?: number | null
           name?: string
           price?: number | null
+          purchase_date?: string | null
           quantity?: number | null
+          sale_date?: string | null
           sku?: string
           status?: string
           storage?: string | null
