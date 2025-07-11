@@ -133,9 +133,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
-                {metrics.totalItems - soldItems < 0
-                  ? 0
-                  : metrics.totalItems - soldItems}
+                {metrics.totalItems}
               </div>
               <p className="text-xs text-white/70">Unique inventory items</p>
             </CardContent>
