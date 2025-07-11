@@ -34,9 +34,9 @@ const Dashboard = () => {
   const [soldItems, setSoldItems] = useState(0);
 
   const metrics = useMemo(() => {
-    const totalItems = items.filter(
-      (item) => item.status === "available"
-    ).length;
+    const totalItems = items
+      .filter((item) => item.status === "available")
+      .reduce((sum, item) => sum + (item.quantity || 0), 0);
     const totalValue = items.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0
