@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import {
@@ -233,7 +232,9 @@ const Inventory = () => {
           style={{ animationDelay: "300ms" }}
         >
           <CardHeader className="pb-3 md:pb-6">
-            <CardTitle className="text-white text-base md:text-lg">Items</CardTitle>
+            <CardTitle className="text-white text-base md:text-lg">
+              Items
+            </CardTitle>
             <CardDescription className="text-white/80 text-xs md:text-sm">
               Manage your inventory items and track stock levels
             </CardDescription>
@@ -261,7 +262,10 @@ const Inventory = () => {
                       item.min_stock_level || 0
                     );
                     return (
-                      <Card key={item.id} className="bg-white/5 border-white/20">
+                      <Card
+                        key={item.id}
+                        className="bg-white/5 border-white/20"
+                      >
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1 min-w-0">
@@ -272,32 +276,45 @@ const Inventory = () => {
                                 {item.sku}
                               </p>
                             </div>
-                            <Badge variant={status.variant} className="text-xs ml-2">
+                            <Badge
+                              variant={status.variant}
+                              className="text-xs ml-2"
+                            >
                               {status.label}
                             </Badge>
                           </div>
-                          
+
                           <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
                             {item.categories?.name && (
                               <div>
                                 <span className="text-white/60">Category:</span>
-                                <span className="text-white ml-1">{item.categories.name}</span>
+                                <span className="text-white ml-1">
+                                  {item.categories.name}
+                                </span>
                               </div>
                             )}
                             <div>
                               <span className="text-white/60">Price:</span>
-                              <span className="text-white ml-1">€{(item.price || 0).toFixed(2)}</span>
+                              <span className="text-white ml-1">
+                                €{(item.price || 0).toFixed(2)}
+                              </span>
                             </div>
                             {item.color && (
                               <div>
                                 <span className="text-white/60">Color:</span>
-                                <span className="text-white ml-1">{item.color}</span>
+                                <span className="text-white ml-1">
+                                  {item.color}
+                                </span>
                               </div>
                             )}
                             {item.condition && (
                               <div>
-                                <span className="text-white/60">Condition:</span>
-                                <span className="text-white ml-1">{item.condition}</span>
+                                <span className="text-white/60">
+                                  Condition:
+                                </span>
+                                <span className="text-white ml-1">
+                                  {item.condition}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -423,10 +440,13 @@ const Inventory = () => {
                               {item.storage || "-"}
                             </TableCell>
                             <TableCell className="text-white text-sm">
-                              €{(item.price || 0).toFixed(2)}
+                              €{(item.cost || 0).toFixed(2)}
                             </TableCell>
                             <TableCell>
-                              <Badge variant={status.variant} className="text-xs">
+                              <Badge
+                                variant={status.variant}
+                                className="text-xs"
+                              >
                                 {status.label}
                               </Badge>
                             </TableCell>
@@ -455,7 +475,9 @@ const Inventory = () => {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleDelete(item.id, item.name)}
+                                  onClick={() =>
+                                    handleDelete(item.id, item.name)
+                                  }
                                   disabled={isDeleting}
                                   className="border-white/30 text-red-500 hover:bg-red-500 hover:text-white"
                                 >
