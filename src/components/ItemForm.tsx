@@ -40,6 +40,7 @@ const itemSchema = z.object({
   cost: z.number().min(0, "Cost cannot be negative"),
   quantity: z.number().optional(),
   purchase_date: z.date().optional(),
+  sale_date: z.date().optional(),
 });
 
 type ItemFormData = z.infer<typeof itemSchema>;
@@ -69,6 +70,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
       cost: 0,
       quantity: 1,
       purchase_date: undefined,
+      sale_date: undefined,
     },
   });
 
@@ -87,6 +89,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         price: item.price || 0,
         cost: item.cost || 0,
         purchase_date: item.purchase_date ? new Date(item.purchase_date) : undefined,
+        sale_date: item.sale_date ? new Date(item.sale_date) : undefined,
       });
     }
   }, [item, form]);
@@ -109,6 +112,7 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
         cost: Number(data.cost) || 0,
         quantity: data.status === "available" ? 1 : 0,
         purchase_date: data.purchase_date ? data.purchase_date.toISOString().split('T')[0] : undefined,
+        sale_date: data.sale_date ? data.sale_date.toISOString().split('T')[0] : undefined,
       };
 
       console.log("Processed item data:", itemData);
@@ -272,6 +276,49 @@ const ItemForm = ({ item, onSuccess, categories }: ItemFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-white">Purchase Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20",
+                          !field.value && "text-white/60"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sale_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Sale Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
