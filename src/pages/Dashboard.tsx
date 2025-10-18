@@ -1,4 +1,5 @@
 import { useInventory } from "@/hooks/useInventory";
+import { useSales } from "@/hooks/useSales";
 import {
   Card,
   CardContent,
@@ -31,7 +32,7 @@ import { useMemo, useEffect, useState } from "react";
 
 const Dashboard = () => {
   const { items, transactions, isLoading } = useInventory();
-  const [soldItems, setSoldItems] = useState(0);
+  const { sales, salesLoading } = useSales();
 
   const metrics = useMemo(() => {
     const totalItems = items
@@ -41,7 +42,12 @@ const Dashboard = () => {
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
       0
     );
-    const soldItems = items.filter((item) => item.status === "sold").length;
+    
+    // Calculate total sold items from sales data
+    const soldItems = sales.reduce((total, sale) => {
+      const saleTotal = sale.sale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      return total + saleTotal;
+    }, 0);
 
     const recentTransactions = transactions.slice(0, 7).reverse();
 
@@ -51,12 +57,7 @@ const Dashboard = () => {
       soldItems,
       recentTransactions,
     };
-  }, [items, transactions]);
-
-  useEffect(() => {
-    const soldCount = transactions.length;
-    setSoldItems(soldCount);
-  }, [transactions]);
+  }, [items, transactions, sales]);
 
   const categoryData = useMemo(() => {
     const categoryMap = new Map();
@@ -76,7 +77,7 @@ const Dashboard = () => {
 
   const COLORS = ["#F72585", "#7209B7", "#3A0CA3", "#4361EE", "#4CC9F0"];
 
-  if (isLoading) {
+  if (isLoading || salesLoading) {
     return (
       <div className="min-h-screen bg-gradient-vibrant relative overflow-hidden">
         {/* Animated background elements */}
@@ -173,7 +174,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-200">
-                {soldItems}
+                {metrics.soldItems}
               </div>
               <p className="text-xs text-white/70">Items sold</p>
             </CardContent>
