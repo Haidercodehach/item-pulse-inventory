@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -68,6 +68,27 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      email: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          password: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          password?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          password?: string | null
         }
         Relationships: []
       }
@@ -377,18 +398,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_invoice_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_invoice_number: { Args: never; Returns: string }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
-      is_admin_or_manager: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      is_admin_or_manager: { Args: { user_id: string }; Returns: boolean }
       process_sale: {
         Args: { sale_data: Json; sale_items_data: Json[] }
         Returns: string
@@ -396,11 +411,11 @@ export type Database = {
       update_inventory_quantity: {
         Args: {
           item_id: string
+          notes_param?: string
           quantity_change: number
+          reference_number_param?: string
           transaction_type_param: Database["public"]["Enums"]["transaction_type"]
           unit_cost_param?: number
-          reference_number_param?: string
-          notes_param?: string
         }
         Returns: undefined
       }
