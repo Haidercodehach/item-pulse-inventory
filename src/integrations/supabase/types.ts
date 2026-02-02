@@ -71,27 +71,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email: {
-        Row: {
-          created_at: string
-          email: string
-          id: number
-          password: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: number
-          password?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: number
-          password?: string | null
-        }
-        Relationships: []
-      }
       inventory_items: {
         Row: {
           barcode: string | null
