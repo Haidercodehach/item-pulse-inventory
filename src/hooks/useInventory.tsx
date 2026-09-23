@@ -24,25 +24,40 @@ export const useInventory = () => {
   } = useQuery({
     queryKey: ["inventory-items"],
     queryFn: async () => {
-      console.log("Fetching inventory items...");
-      const { data, error } = await supabase
-        .from("inventory_items")
-        .select(
-          `
-          *,
-          categories(name)
-        `
-        )
-        .order("created_at", { ascending: false });
+      // Supabase caps each request at 1000 rows, so page through everything
+      const pageSize = 1000;
+      let from = 0;
+      const all: (InventoryItem & { categories: { name: string } | null })[] =
+        [];
 
-      if (error) {
-        console.error("Error fetching inventory items:", error);
-        throw error;
+      while (true) {
+        const { data, error } = await supabase
+          .from("inventory_items")
+          .select(
+            `
+            *,
+            categories(name)
+          `
+          )
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+
+        if (error) {
+          console.error("Error fetching inventory items:", error);
+          throw error;
+        }
+
+        const page = (data ?? []) as (InventoryItem & {
+          categories: { name: string } | null;
+        })[];
+        all.push(...page);
+
+        if (page.length < pageSize) break;
+        from += pageSize;
       }
-      console.log("Inventory items fetched successfully:", data);
-      return data as (InventoryItem & {
-        categories: { name: string } | null;
-      })[];
+
+      console.log("Inventory items fetched successfully:", all.length);
+      return all;
     },
   });
 
