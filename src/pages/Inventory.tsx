@@ -401,7 +401,13 @@ const Inventory = () => {
                               </div>
                             )}
                             <div>
-                              <span className="text-white/60">Price:</span>
+                              <span className="text-white/60">Purchase:</span>
+                              <span className="text-white ml-1">
+                                €{(item.cost || 0).toFixed(2)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-white/60">Sell:</span>
                               <span className="text-white ml-1">
                                 €{(item.price || 0).toFixed(2)}
                               </span>
@@ -491,8 +497,11 @@ const Inventory = () => {
                       <TableHead className="text-white/90 min-w-[100px]">
                         Storage
                       </TableHead>
-                      <TableHead className="text-white/90 min-w-[80px]">
-                        Price
+                      <TableHead className="text-white/90 min-w-[110px]">
+                        Purchase Price
+                      </TableHead>
+                      <TableHead className="text-white/90 min-w-[110px]">
+                        Sell Price
                       </TableHead>
                       <TableHead className="text-white/90 min-w-[100px]">
                         Status
@@ -505,7 +514,7 @@ const Inventory = () => {
                   <TableBody>
                     {filteredItems.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8">
+                        <TableCell colSpan={10} className="text-center py-8">
                           <div className="flex flex-col items-center gap-2">
                             <Package className="w-12 h-12 text-white/40" />
                             <p className="text-white/60">No items found</p>
@@ -546,8 +555,11 @@ const Inventory = () => {
                             <TableCell className="text-white/80 text-sm">
                               {item.storage || "-"}
                             </TableCell>
-                            <TableCell className="text-white text-sm">
+                            <TableCell className="text-white/80 text-sm">
                               €{(item.cost || 0).toFixed(2)}
+                            </TableCell>
+                            <TableCell className="text-white text-sm">
+                              €{(item.price || 0).toFixed(2)}
                             </TableCell>
                             <TableCell>
                               <Badge
