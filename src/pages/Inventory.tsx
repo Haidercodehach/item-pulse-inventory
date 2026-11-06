@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import {
   Card,
@@ -61,6 +61,7 @@ const Inventory = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStockStatus, setSelectedStockStatus] = useState("all");
   const [selectedCondition, setSelectedCondition] = useState("all");
+  const [selectedStorage, setSelectedStorage] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -71,6 +72,33 @@ const Inventory = () => {
     if (/nuov|new/.test(c)) return "new";
     return "other";
   };
+
+  // Storage is free text too: "256 GB", "4/128", "8-256gb", "01 TB"...
+  // RAM comes first, so the capacity is the last number; TB counts as 1024 GB.
+  const getStorageGB = (storage?: string | null) => {
+    const s = (storage || "").toLowerCase();
+    const nums = s.match(/\d+/g);
+    if (!nums) return null;
+    let gb = parseInt(nums[nums.length - 1], 10);
+    if (/tb|tera/.test(s)) gb *= 1024;
+    return gb;
+  };
+
+  const STORAGE_STEPS = [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+
+  const storageOptions = useMemo(() => {
+    const present = new Set<number>();
+    let hasOther = false;
+    for (const item of items) {
+      const gb = getStorageGB(item.storage);
+      if (gb !== null && STORAGE_STEPS.includes(gb)) present.add(gb);
+      else hasOther = true;
+    }
+    return { sizes: [...present].sort((a, b) => a - b), hasOther };
+  }, [items]);
+
+  const storageLabel = (gb: number) =>
+    gb >= 1024 ? `${gb / 1024} TB` : `${gb} GB`;
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
@@ -94,7 +122,20 @@ const Inventory = () => {
       selectedCondition === "all" ||
       getConditionGroup(item.condition) === selectedCondition;
 
-    return matchesSearch && matchesCategory && matchesStockStatus && matchesCondition;
+    const itemGB = getStorageGB(item.storage);
+    const matchesStorage =
+      selectedStorage === "all" ||
+      (selectedStorage === "other"
+        ? itemGB === null || !STORAGE_STEPS.includes(itemGB)
+        : itemGB === parseInt(selectedStorage, 10));
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesStockStatus &&
+      matchesCondition &&
+      matchesStorage
+    );
   });
 
   const handleDelete = async (itemId: string, itemName: string) => {
@@ -212,7 +253,7 @@ const Inventory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                 <Input
@@ -263,6 +304,25 @@ const Inventory = () => {
                   <SelectItem value="new">New</SelectItem>
                   <SelectItem value="used">Used</SelectItem>
                   <SelectItem value="other">Other / Not set</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedStorage}
+                onValueChange={setSelectedStorage}
+              >
+                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm text-sm">
+                  <SelectValue placeholder="All Storage" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="all">All Storage</SelectItem>
+                  {storageOptions.sizes.map((gb) => (
+                    <SelectItem key={gb} value={String(gb)}>
+                      {storageLabel(gb)}
+                    </SelectItem>
+                  ))}
+                  {storageOptions.hasOther && (
+                    <SelectItem value="other">Other / Not set</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <div className="text-xs md:text-sm text-white/80 flex items-center justify-center sm:justify-start bg-white/5 rounded-md px-3 py-2">
