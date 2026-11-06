@@ -251,6 +251,20 @@ const Inventory = () => {
                   <SelectItem value="out-of-stock">Out of Stock</SelectItem>
                 </SelectContent>
               </Select>
+              <Select
+                value={selectedCondition}
+                onValueChange={setSelectedCondition}
+              >
+                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm text-sm">
+                  <SelectValue placeholder="All Conditions" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="all">All Conditions</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="used">Used</SelectItem>
+                  <SelectItem value="other">Other / Not set</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="text-xs md:text-sm text-white/80 flex items-center justify-center sm:justify-start bg-white/5 rounded-md px-3 py-2">
                 <Package className="w-4 h-4 mr-1" />
                 {filteredItems.length} items found
