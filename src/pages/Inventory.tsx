@@ -60,8 +60,17 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStockStatus, setSelectedStockStatus] = useState("all");
+  const [selectedCondition, setSelectedCondition] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+
+  // Group the free-text condition values (Nuovo, Usato 95%, refurbished...)
+  const getConditionGroup = (condition?: string | null) => {
+    const c = (condition || "").toLowerCase();
+    if (/usat|used|refurbish/.test(c)) return "used";
+    if (/nuov|new/.test(c)) return "new";
+    return "other";
+  };
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
@@ -81,7 +90,11 @@ const Inventory = () => {
       (selectedStockStatus === "in-stock" && quantity > 0) ||
       (selectedStockStatus === "out-of-stock" && quantity === 0);
 
-    return matchesSearch && matchesCategory && matchesStockStatus;
+    const matchesCondition =
+      selectedCondition === "all" ||
+      getConditionGroup(item.condition) === selectedCondition;
+
+    return matchesSearch && matchesCategory && matchesStockStatus && matchesCondition;
   });
 
   const handleDelete = async (itemId: string, itemName: string) => {
@@ -199,7 +212,7 @@ const Inventory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                 <Input
@@ -236,6 +249,20 @@ const Inventory = () => {
                   <SelectItem value="all">All Stock Status</SelectItem>
                   <SelectItem value="in-stock">In Stock</SelectItem>
                   <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedCondition}
+                onValueChange={setSelectedCondition}
+              >
+                <SelectTrigger className="bg-white/10 border-white/20 text-white backdrop-blur-sm text-sm">
+                  <SelectValue placeholder="All Conditions" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  <SelectItem value="all">All Conditions</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="used">Used</SelectItem>
+                  <SelectItem value="other">Other / Not set</SelectItem>
                 </SelectContent>
               </Select>
               <div className="text-xs md:text-sm text-white/80 flex items-center justify-center sm:justify-start bg-white/5 rounded-md px-3 py-2">
