@@ -90,7 +90,11 @@ const Inventory = () => {
       (selectedStockStatus === "in-stock" && quantity > 0) ||
       (selectedStockStatus === "out-of-stock" && quantity === 0);
 
-    return matchesSearch && matchesCategory && matchesStockStatus;
+    const matchesCondition =
+      selectedCondition === "all" ||
+      getConditionGroup(item.condition) === selectedCondition;
+
+    return matchesSearch && matchesCategory && matchesStockStatus && matchesCondition;
   });
 
   const handleDelete = async (itemId: string, itemName: string) => {
@@ -208,7 +212,7 @@ const Inventory = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                 <Input
