@@ -60,8 +60,17 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStockStatus, setSelectedStockStatus] = useState("all");
+  const [selectedCondition, setSelectedCondition] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+
+  // Group the free-text condition values (Nuovo, Usato 95%, refurbished...)
+  const getConditionGroup = (condition?: string | null) => {
+    const c = (condition || "").toLowerCase();
+    if (/usat|used|refurbish/.test(c)) return "used";
+    if (/nuov|new/.test(c)) return "new";
+    return "other";
+  };
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
