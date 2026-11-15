@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ItemForm from "@/components/ItemForm";
+import InventoryReceiptButton from "@/components/InventoryReceiptButton";
 import { useToast } from "@/hooks/use-toast";
 
 const Inventory = () => {
@@ -433,6 +434,7 @@ const Inventory = () => {
                           </div>
 
                           <div className="flex gap-2">
+                            <InventoryReceiptButton item={item} />
                             <Drawer>
                               <DrawerTrigger asChild>
                                 <Button
@@ -571,6 +573,7 @@ const Inventory = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-2">
+                                <InventoryReceiptButton item={item} />
                                 <Dialog>
                                   <DialogTrigger asChild>
                                     <Button
