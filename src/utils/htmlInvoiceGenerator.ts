@@ -1,9 +1,4 @@
-
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { createRoot } from 'react-dom/client';
-import InvoiceTemplate from '@/components/InvoiceTemplate';
-import React from 'react';
+import type jsPDF from 'jspdf';
 
 interface InvoiceData {
   sale: any;
@@ -13,186 +8,101 @@ interface InvoiceData {
 
 const validateSaleData = (sale: any): string[] => {
   const errors: string[] = [];
-  
-  if (!sale) {
-    errors.push('Sale data is missing');
-    return errors;
-  }
-  
-  if (!sale.invoice_number) {
-    errors.push('Invoice number is missing');
-  }
-  
-  if (!sale.total_amount && sale.total_amount !== 0) {
-    errors.push('Total amount is missing');
-  }
-  
-  if (!sale.created_at) {
-    errors.push('Sale date is missing');
-  }
-  
+  if (!sale) return ['Sale data is missing'];
+  if (!sale.invoice_number) errors.push('Invoice number is missing');
+  if (!sale.total_amount && sale.total_amount !== 0) errors.push('Total amount is missing');
+  if (!sale.created_at) errors.push('Sale date is missing');
   return errors;
 };
 
-const renderInvoiceToCanvas = async (data: InvoiceData): Promise<HTMLCanvasElement> => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Create a temporary container
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.width = '800px';
-      document.body.appendChild(container);
+const eur = (v: any) => `€${parseFloat(v || 0).toFixed(2)}`;
 
-      // Create React root and render the invoice
-      const root = createRoot(container);
-      const invoiceElement = React.createElement(InvoiceTemplate, data);
-      
-      root.render(invoiceElement);
-
-      // Wait for the component to render, then capture it
-      setTimeout(async () => {
-        try {
-          const canvas = await html2canvas(container, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            width: 800,
-            height: container.scrollHeight || 1200
-          });
-
-          // Cleanup
-          root.unmount();
-          document.body.removeChild(container);
-          
-          resolve(canvas);
-        } catch (error) {
-          // Cleanup on error
-          root.unmount();
-          document.body.removeChild(container);
-          reject(error);
-        }
-      }, 1000); // Give React time to render
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
+// Draws the invoice directly as vector PDF (no screenshotting the page), so it
+// never blocks the main thread like the old HTML-to-canvas approach did.
 export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
-  const { sale, company = {}, settings = {} } = data;
-  
-  console.log('Starting HTML-to-PDF invoice generation with data:', {
-    saleId: sale?.id,
-    invoiceNumber: sale?.invoice_number,
-    companyName: company?.name,
-    itemsCount: sale?.sale_items?.length
+  const { sale, company = {} } = data;
+  const errors = validateSaleData(sale);
+  if (errors.length) throw new Error(`Failed to generate invoice PDF: Invalid sale data: ${errors.join(', ')}`);
+
+  const [{ default: JsPDF }, { default: autoTable }] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ]);
+  const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, M = 15;
+
+  doc.setFont('helvetica', 'bold').setFontSize(20).setTextColor(31, 41, 55);
+  doc.text(company?.name || 'Your Company', M, 22);
+  doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
+  let y = 29;
+  for (const line of [company?.address, company?.phone && `Phone: ${company.phone}`, company?.email && `Email: ${company.email}`]) {
+    if (line) { doc.text(String(line), M, y); y += 5; }
+  }
+
+  doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(31, 41, 55);
+  doc.text('INVOICE', W - M, 22, { align: 'right' });
+  doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
+  doc.text(`#${sale.invoice_number}`, W - M, 29, { align: 'right' });
+  doc.text(`Date: ${new Date(sale.created_at).toLocaleDateString()}`, W - M, 34, { align: 'right' });
+
+  y = Math.max(y, 40) + 4;
+  const customer = [sale.customer_name, sale.customer_email, sale.customer_phone, sale.customer_address].filter(Boolean);
+  if (customer.length) {
+    doc.setFont('helvetica', 'bold').setFontSize(12).setTextColor(31, 41, 55);
+    doc.text('Bill To:', M, y); y += 6;
+    doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
+    customer.forEach((c) => { doc.text(String(c), M, y); y += 5; });
+    y += 3;
+  }
+
+  const items = sale.sale_items || [];
+  autoTable(doc, {
+    startY: y,
+    head: [['Item', 'Qty', 'Unit Price', 'Total']],
+    body: items.length
+      ? items.map((it: any) => [it.inventory_items?.name || it.name || 'Unknown Item', String(it.quantity || 0), eur(it.unit_price), eur(it.total_price)])
+      : [['No items', '', '', '']],
+    margin: { left: M, right: M },
+    styles: { fontSize: 10, cellPadding: 3, lineColor: [209, 213, 219], lineWidth: 0.2 },
+    headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+    columnStyles: { 1: { halign: 'center' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
   });
 
-  try {
-    // Validate sale data
-    const validationErrors = validateSaleData(sale);
-    if (validationErrors.length > 0) {
-      console.error('Sale data validation failed:', validationErrors);
-      throw new Error(`Invalid sale data: ${validationErrors.join(', ')}`);
-    }
+  y = ((doc as any).lastAutoTable?.finalY || y) + 10;
+  const row = (label: string, value: string, bold = false) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal').setFontSize(bold ? 12 : 10).setTextColor(31, 41, 55);
+    doc.text(label, W - M - 60, y);
+    doc.text(value, W - M, y, { align: 'right' });
+    y += bold ? 8 : 6;
+  };
+  row('Subtotal:', eur(sale.subtotal));
+  if (parseFloat(sale.discount_amount || 0) > 0) row('Discount:', `-${eur(sale.discount_amount)}`);
+  if (parseFloat(sale.tax_amount || 0) > 0) row('Tax:', eur(sale.tax_amount));
+  doc.setDrawColor(31, 41, 55).setLineWidth(0.5).line(W - M - 60, y - 4, W - M, y - 4);
+  y += 2;
+  row('Total:', eur(sale.total_amount), true);
 
-    // Render invoice to canvas
-    const canvas = await renderInvoiceToCanvas(data);
-    
-    // Create PDF from canvas
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // Add the image to PDF
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Add additional pages if needed
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    console.log('HTML-to-PDF invoice generated successfully');
-    return pdf;
-    
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    console.error('Sale data structure:', JSON.stringify(sale, null, 2));
-    throw new Error(`Failed to generate invoice PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  y += 8;
+  doc.setTextColor(75, 85, 99);
+  if (sale.notes) {
+    doc.setFont('helvetica', 'bold').setFontSize(10).text('Notes:', W / 2, y, { align: 'center' }); y += 5;
+    doc.setFont('helvetica', 'normal');
+    const lines = doc.splitTextToSize(String(sale.notes), W - 2 * M);
+    doc.text(lines, W / 2, y, { align: 'center' }); y += lines.length * 5 + 4;
   }
+  doc.setFont('helvetica', 'bold').setFontSize(12).text('Thank you for your business!', W / 2, y, { align: 'center' });
+  return doc;
 };
 
 export const downloadInvoice = async (sale: any, company: any = {}, settings: any = {}) => {
-  try {
-    console.log('Starting invoice download for sale:', sale?.id);
-    
-    if (!sale) {
-      throw new Error('Sale data is required for invoice generation');
-    }
-    
-    if (!sale.invoice_number) {
-      throw new Error('Invoice number is missing from sale data');
-    }
-    
-    const doc = await generateInvoicePDF({ sale, company, settings });
-    const fileName = `invoice-${sale.invoice_number}.pdf`;
-    
-    console.log('Downloading invoice as:', fileName);
-    doc.save(fileName);
-    
-  } catch (error) {
-    console.error('Error downloading invoice:', error);
-    throw error;
-  }
+  const doc = await generateInvoicePDF({ sale, company, settings });
+  doc.save(`invoice-${sale.invoice_number}.pdf`);
 };
 
 export const printInvoice = async (sale: any, company: any = {}, settings: any = {}) => {
-  try {
-    console.log('Starting invoice print for sale:', sale?.id);
-    
-    if (!sale) {
-      throw new Error('Sale data is required for invoice generation');
-    }
-    
-    if (!sale.invoice_number) {
-      throw new Error('Invoice number is missing from sale data');
-    }
-    
-    const doc = await generateInvoicePDF({ sale, company, settings });
-    
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    const printWindow = window.open(url, '_blank');
-    
-    if (!printWindow) {
-      throw new Error('Failed to open print window. Please check your browser popup settings.');
-    }
-    
-    // Clean up the URL after a delay
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1000);
-    
-    console.log('Invoice sent to printer successfully');
-    
-  } catch (error) {
-    console.error('Error printing invoice:', error);
-    throw error;
-  }
+  const doc = await generateInvoicePDF({ sale, company, settings });
+  const url = URL.createObjectURL(doc.output('blob'));
+  const w = window.open(url, '_blank');
+  if (!w) throw new Error('Failed to open print window. Please check your browser popup settings.');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 };
