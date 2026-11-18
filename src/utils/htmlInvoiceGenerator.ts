@@ -17,6 +17,37 @@ const validateSaleData = (sale: any): string[] => {
 
 const eur = (v: any) => `€${parseFloat(v || 0).toFixed(2)}`;
 
+export const formatSaleType = (condition?: string | null) => {
+  const value = (condition || '').toLowerCase();
+  if (/usat|used|refurbish/.test(value)) return 'Used';
+  if (/nuov|new/.test(value)) return 'New';
+  return 'Other / Not set';
+};
+
+export const formatPaymentMethod = (method?: string | null) => {
+  const value = (method || '').trim();
+  if (/^cash$/i.test(value)) return 'Cash';
+  if (/^card$/i.test(value)) return 'Card';
+  return value || 'Not provided';
+};
+
+export const invoiceDeviceLines = (saleItem: any) => {
+  const item = { ...(saleItem || {}), ...(saleItem?.inventory_items || {}) };
+  const details = [
+    item.color && `Color: ${item.color}`,
+    item.condition && `Condition: ${item.condition}`,
+  ].filter(Boolean).join('; ');
+
+  return [
+    `Device Name: ${item.name || 'Not provided'}`,
+    `IMEI Number: ${item.sku || 'Not provided'}`,
+    `Description: ${item.description || 'Not provided'}`,
+    `Storage: ${item.storage || 'Not provided'}`,
+    `Details: ${details || 'Not provided'}`,
+    `Sale Type: ${formatSaleType(item.condition)}`,
+  ];
+};
+
 // Draws the invoice directly as vector PDF (no screenshotting the page), so it
 // never blocks the main thread like the old HTML-to-canvas approach did.
 export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
@@ -58,23 +89,33 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
   const items = sale.sale_items || [];
   autoTable(doc, {
     startY: y,
-    head: [['Item', 'Qty', 'Unit Price', 'Total']],
+    head: [['Device Details', 'Qty', 'Unit Price', 'Total']],
     body: items.length
-      ? items.map((it: any) => [it.inventory_items?.name || it.name || 'Unknown Item', String(it.quantity || 0), eur(it.unit_price), eur(it.total_price)])
+      ? items.map((it: any) => [invoiceDeviceLines(it).join('\n'), String(it.quantity || 0), eur(it.unit_price), eur(it.total_price)])
       : [['No items', '', '', '']],
     margin: { left: M, right: M },
-    styles: { fontSize: 10, cellPadding: 3, lineColor: [209, 213, 219], lineWidth: 0.2 },
+    styles: { fontSize: 9, cellPadding: 3, lineColor: [209, 213, 219], lineWidth: 0.2, valign: 'top' },
     headStyles: { fillColor: [37, 99, 235], textColor: 255 },
-    columnStyles: { 1: { halign: 'center' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+    columnStyles: {
+      0: { cellWidth: 92 },
+      1: { cellWidth: 14, halign: 'center' },
+      2: { cellWidth: 37, halign: 'right' },
+      3: { cellWidth: 37, halign: 'right' },
+    },
   });
 
   y = ((doc as any).lastAutoTable?.finalY || y) + 10;
+  if (y > 250) {
+    doc.addPage();
+    y = 20;
+  }
   const row = (label: string, value: string, bold = false) => {
     doc.setFont('helvetica', bold ? 'bold' : 'normal').setFontSize(bold ? 12 : 10).setTextColor(31, 41, 55);
     doc.text(label, W - M - 60, y);
     doc.text(value, W - M, y, { align: 'right' });
     y += bold ? 8 : 6;
   };
+  row('Payment Method:', formatPaymentMethod(sale.payment_method));
   row('Subtotal:', eur(sale.subtotal));
   if (parseFloat(sale.discount_amount || 0) > 0) row('Discount:', `-${eur(sale.discount_amount)}`);
   if (parseFloat(sale.tax_amount || 0) > 0) row('Tax:', eur(sale.tax_amount));

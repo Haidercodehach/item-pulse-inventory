@@ -42,7 +42,7 @@ const InventoryReceiptButton = ({ item }: Props) => {
     // Keep the complete transaction so the receipt's items and totals match.
     const { data: sale, error: saleError } = await supabase
       .from("sales")
-      .select("*, sale_items(*, inventory_items(name, sku))")
+      .select("*, sale_items(*, inventory_items(name, sku, description, storage, color, condition))")
       .eq("id", saleItem.sale_id)
       .single();
     if (saleError) throw saleError;
