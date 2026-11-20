@@ -3,6 +3,7 @@ import {
   formatPaymentMethod,
   formatSaleType,
   generateInvoicePDF,
+  invoiceAddressLines,
   invoiceDeviceLines,
 } from "./htmlInvoiceGenerator";
 
@@ -70,5 +71,41 @@ describe("invoice device details", () => {
     for (const text of ["Device Name:", "IMEI Number:", "Warranty:", "Storage:", "Details:", "Sale Type:", "Payment Method:", "Card"]) {
       expect(pdf).toContain(text);
     }
+  });
+
+  it("splits several shop addresses and drops the one no longer used", () => {
+    expect(
+      invoiceAddressLines({
+        address: "Via Vitruvio 47 20124 MILANO, Via vitruvio 40 20124 MILANO, Viale andrea doria 30 20124",
+      })
+    ).toEqual(["Via Vitruvio 47 20124 MILANO", "Via vitruvio 40 20124 MILANO"]);
+    expect(invoiceAddressLines({ address: "" })).toEqual([]);
+    expect(invoiceAddressLines({})).toEqual([]);
+  });
+
+  it("prints both shop addresses and only the seller signature", async () => {
+    const doc = await generateInvoicePDF({
+      sale: {
+        invoice_number: "INV-TEST-2",
+        created_at: "2026-11-18T12:00:00Z",
+        subtotal: 520,
+        discount_amount: 0,
+        tax_amount: 0,
+        total_amount: 520,
+        payment_method: "cash",
+        sale_items: [{ ...device, quantity: 1, unit_price: 520, total_price: 520 }],
+      },
+      company: {
+        name: "S&Z Mobiles",
+        address: "Via Vitruvio 47 20124 MILANO, Via vitruvio 40 20124 MILANO, Viale andrea doria 30 20124",
+      },
+      settings: {},
+    });
+    const pdf = doc.output();
+    expect(pdf).toContain("Via Vitruvio 47 20124 MILANO");
+    expect(pdf).toContain("Via vitruvio 40 20124 MILANO");
+    expect(pdf).not.toContain("andrea doria");
+    expect(pdf).toContain("Seller signature");
+    expect(pdf).not.toContain("Customer signature");
   });
 });

@@ -31,6 +31,16 @@ export const formatPaymentMethod = (method?: string | null) => {
   return value || 'Not provided';
 };
 
+// Addresses the shop no longer wants printed on receipts.
+const REMOVED_ADDRESS = /andrea doria/i;
+
+// The Address field can hold several addresses separated by commas or new lines.
+export const invoiceAddressLines = (company: any): string[] =>
+  String(company?.address || '')
+    .split(/[\n,]/)
+    .map((line) => line.trim())
+    .filter((line) => line && !REMOVED_ADDRESS.test(line));
+
 export const invoiceDeviceLines = (saleItem: any) => {
   const item = { ...(saleItem || {}), ...(saleItem?.inventory_items || {}) };
   const details = [
@@ -66,7 +76,12 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
   doc.text(company?.name || 'Your Company', M, 22);
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
   let y = 29;
-  for (const line of [company?.phone && `Phone: ${company.phone}`, company?.email && `Email: ${company.email}`]) {
+  const headerLines = [
+    ...invoiceAddressLines(company),
+    company?.phone && `Phone: ${company.phone}`,
+    company?.email && `Email: ${company.email}`,
+  ];
+  for (const line of headerLines) {
     if (line) { doc.text(String(line), M, y); y += 5; }
   }
 
@@ -131,15 +146,13 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
     const lines = doc.splitTextToSize(String(sale.notes), W - 2 * M);
     doc.text(lines, W / 2, y, { align: 'center' }); y += lines.length * 5 + 4;
   }
-  // Fill the rest of the page: signature lines and a footer pinned to the bottom.
+  // Fill the rest of the page: a seller signature line and a footer pinned to the bottom.
   const H = 297;
   const sigY = Math.max(y + 20, H - 55);
   doc.setDrawColor(156, 163, 175).setLineWidth(0.3);
   doc.line(M, sigY, M + 70, sigY);
-  doc.line(W - M - 70, sigY, W - M, sigY);
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
   doc.text('Seller signature', M, sigY + 5);
-  doc.text('Customer signature', W - M - 70, sigY + 5);
   doc.setFillColor(37, 99, 235).rect(0, H - 30, W, 30, 'F');
   doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(255, 255, 255);
   doc.text('Thank you for your business!', W / 2, H - 17, { align: 'center' });
