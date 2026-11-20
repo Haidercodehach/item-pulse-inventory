@@ -1,3 +1,4 @@
+import { encodeSplitPayment } from "@/utils/htmlInvoiceGenerator";
 import { useState, useEffect } from "react";
 import { useInventory } from "@/hooks/useInventory";
 import { useSales } from "@/hooks/useSales";
@@ -64,6 +65,7 @@ const POSSystem = () => {
     address: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [cardPart, setCardPart] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [notes, setNotes] = useState("");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -152,6 +154,7 @@ const POSSystem = () => {
     setCustomerInfo({ name: "", email: "", phone: "", address: "" });
     setDiscountAmount(0);
     setNotes("");
+    setCardPart(0);
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
@@ -160,6 +163,10 @@ const POSSystem = () => {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    if (paymentMethod === "split" && (cardPart <= 0 || cardPart >= total)) {
+      alert("For a split payment, the card amount must be more than €0 and less than the total.");
+      return;
+    }
 
     const saleData = {
       customer_name: customerInfo.name || null,
@@ -171,7 +178,10 @@ const POSSystem = () => {
       tax_amount: taxAmount.toFixed(2), // Save 0.00 as tax amount
       discount_amount: discountAmount.toFixed(2),
       total_amount: total.toFixed(2),
-      payment_method: paymentMethod,
+      payment_method:
+        paymentMethod === "split"
+          ? encodeSplitPayment(cardPart, Math.max(total - cardPart, 0))
+          : paymentMethod,
       payment_status: "paid",
       notes: notes || null,
     };
@@ -494,10 +504,39 @@ const POSSystem = () => {
                             <SelectContent>
                               <SelectItem value="cash">Cash</SelectItem>
                               <SelectItem value="card">Card</SelectItem>
+                              <SelectItem value="split">Card + Cash (split)</SelectItem>
                               <SelectItem value="check">Check</SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
+                          {paymentMethod === "split" && (
+                            <div className="mt-3 grid grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor="card-part">Paid by card (€)</Label>
+                                <Input
+                                  id="card-part"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={cardPart}
+                                  onChange={(e) => setCardPart(parseFloat(e.target.value) || 0)}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="cash-part">Paid in cash (€)</Label>
+                                <Input
+                                  id="cash-part"
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={Math.max(total - cardPart, 0).toFixed(2)}
+                                  onChange={(e) =>
+                                    setCardPart(Math.max(total - (parseFloat(e.target.value) || 0), 0))
+                                  }
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div>

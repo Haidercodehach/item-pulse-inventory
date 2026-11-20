@@ -24,8 +24,14 @@ export const formatSaleType = (condition?: string | null) => {
   return 'Other / Not set';
 };
 
+// Split payments are stored as "split:card=120.00;cash=80.00".
+export const encodeSplitPayment = (card: number, cash: number) =>
+  `split:card=${card.toFixed(2)};cash=${cash.toFixed(2)}`;
+
 export const formatPaymentMethod = (method?: string | null) => {
   const value = (method || '').trim();
+  const split = /^split:card=([\d.]+);cash=([\d.]+)$/i.exec(value);
+  if (split) return `Card €${Number(split[1]).toFixed(2)} + Cash €${Number(split[2]).toFixed(2)}`;
   if (/^cash$/i.test(value)) return 'Cash';
   if (/^card$/i.test(value)) return 'Card';
   return value || 'Not provided';

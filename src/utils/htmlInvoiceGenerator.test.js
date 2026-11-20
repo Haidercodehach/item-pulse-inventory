@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   formatPaymentMethod,
+  encodeSplitPayment,
   formatSaleType,
   generateInvoicePDF,
   invoiceAddressLines,
@@ -50,6 +51,7 @@ describe("invoice device details", () => {
     expect(formatPaymentMethod("card")).toBe("Card");
     expect(formatPaymentMethod("CASH")).toBe("Cash");
     expect(formatPaymentMethod(null)).toBe("Not provided");
+    expect(formatPaymentMethod(encodeSplitPayment(120, 80))).toBe("Card €120.00 + Cash €80.00");
   });
 
   it("writes the device fields and payment method into the PDF", async () => {

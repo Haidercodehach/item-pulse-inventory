@@ -1,3 +1,4 @@
+import { formatPaymentMethod } from "@/utils/htmlInvoiceGenerator";
 import { useState } from "react";
 import { useSales } from "@/hooks/useSales";
 import { useSettings } from "@/hooks/useSettings";
@@ -288,7 +289,7 @@ const Sales = () => {
                           €{parseFloat(sale.total_amount.toString()).toFixed(2)}
                         </TableCell>
                         <TableCell className="capitalize text-white/80">
-                          {sale.payment_method || "N/A"}
+                          {formatPaymentMethod(sale.payment_method)}
                         </TableCell>
                         <TableCell>
                           {getPaymentStatusBadge(sale.payment_status)}
