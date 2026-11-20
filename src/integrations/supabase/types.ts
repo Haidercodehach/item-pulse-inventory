@@ -95,6 +95,7 @@ export type Database = {
           storage: string | null
           supplier_id: number | null
           updated_at: string | null
+          warranty: string | null
         }
         Insert: {
           barcode?: string | null
@@ -119,6 +120,7 @@ export type Database = {
           storage?: string | null
           supplier_id?: number | null
           updated_at?: string | null
+          warranty?: string | null
         }
         Update: {
           barcode?: string | null
@@ -143,6 +145,7 @@ export type Database = {
           storage?: string | null
           supplier_id?: number | null
           updated_at?: string | null
+          warranty?: string | null
         }
         Relationships: [
           {

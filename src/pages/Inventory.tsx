@@ -413,6 +413,12 @@ const Inventory = () => {
                                 €{(item.price || 0).toFixed(2)}
                               </span>
                             </div>
+                            {item.warranty && (
+                              <div>
+                                <span className="text-white/60">Warranty:</span>
+                                <span className="text-white ml-1">{item.warranty}</span>
+                              </div>
+                            )}
                             {item.color && (
                               <div>
                                 <span className="text-white/60">Color:</span>
@@ -499,6 +505,9 @@ const Inventory = () => {
                       <TableHead className="text-white/90 min-w-[100px]">
                         Storage
                       </TableHead>
+                      <TableHead className="text-white/90 min-w-[100px]">
+                        Warranty
+                      </TableHead>
                       <TableHead className="text-white/90 min-w-[110px]">
                         Purchase Price
                       </TableHead>
@@ -556,6 +565,9 @@ const Inventory = () => {
                             </TableCell>
                             <TableCell className="text-white/80 text-sm">
                               {item.storage || "-"}
+                            </TableCell>
+                            <TableCell className="text-white/80 text-sm">
+                              {item.warranty || "-"}
                             </TableCell>
                             <TableCell className="text-white/80 text-sm">
                               €{(item.cost || 0).toFixed(2)}

@@ -41,7 +41,7 @@ export const invoiceDeviceLines = (saleItem: any) => {
   return [
     `Device Name: ${item.name || 'Not provided'}`,
     `IMEI Number: ${item.sku || 'Not provided'}`,
-    `Description: ${item.description || 'Not provided'}`,
+    `Warranty: ${item.warranty || 'Not provided'}`,
     `Storage: ${item.storage || 'Not provided'}`,
     `Details: ${details || 'Not provided'}`,
     `Sale Type: ${formatSaleType(item.condition)}`,
@@ -62,15 +62,15 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
   const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210, M = 15;
 
-  doc.setFont('helvetica', 'bold').setFontSize(20).setTextColor(31, 41, 55);
+  doc.setFont('helvetica', 'bold').setFontSize(26).setTextColor(31, 41, 55);
   doc.text(company?.name || 'Your Company', M, 22);
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
   let y = 29;
-  for (const line of [company?.address, company?.phone && `Phone: ${company.phone}`, company?.email && `Email: ${company.email}`]) {
+  for (const line of [company?.phone && `Phone: ${company.phone}`, company?.email && `Email: ${company.email}`]) {
     if (line) { doc.text(String(line), M, y); y += 5; }
   }
 
-  doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(31, 41, 55);
+  doc.setFont('helvetica', 'bold').setFontSize(24).setTextColor(31, 41, 55);
   doc.text('INVOICE', W - M, 22, { align: 'right' });
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
   doc.text(`#${sale.invoice_number}`, W - M, 29, { align: 'right' });
@@ -94,8 +94,8 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
       ? items.map((it: any) => [invoiceDeviceLines(it).join('\n'), String(it.quantity || 0), eur(it.unit_price), eur(it.total_price)])
       : [['No items', '', '', '']],
     margin: { left: M, right: M },
-    styles: { fontSize: 9, cellPadding: 3, lineColor: [209, 213, 219], lineWidth: 0.2, valign: 'top' },
-    headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+    styles: { fontSize: 12, cellPadding: 5, minCellHeight: 14, lineColor: [209, 213, 219], lineWidth: 0.2, valign: 'top' },
+    headStyles: { fillColor: [37, 99, 235], textColor: 255, fontSize: 13 },
     columnStyles: {
       0: { cellWidth: 92 },
       1: { cellWidth: 14, halign: 'center' },
@@ -105,21 +105,21 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
   });
 
   y = ((doc as any).lastAutoTable?.finalY || y) + 10;
-  if (y > 250) {
+  if (y > 200) {
     doc.addPage();
     y = 20;
   }
   const row = (label: string, value: string, bold = false) => {
-    doc.setFont('helvetica', bold ? 'bold' : 'normal').setFontSize(bold ? 12 : 10).setTextColor(31, 41, 55);
-    doc.text(label, W - M - 60, y);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal').setFontSize(bold ? 16 : 12).setTextColor(31, 41, 55);
+    doc.text(label, W - M - 80, y);
     doc.text(value, W - M, y, { align: 'right' });
-    y += bold ? 8 : 6;
+    y += bold ? 11 : 8;
   };
   row('Payment Method:', formatPaymentMethod(sale.payment_method));
   row('Subtotal:', eur(sale.subtotal));
   if (parseFloat(sale.discount_amount || 0) > 0) row('Discount:', `-${eur(sale.discount_amount)}`);
   if (parseFloat(sale.tax_amount || 0) > 0) row('Tax:', eur(sale.tax_amount));
-  doc.setDrawColor(31, 41, 55).setLineWidth(0.5).line(W - M - 60, y - 4, W - M, y - 4);
+  doc.setDrawColor(31, 41, 55).setLineWidth(0.5).line(W - M - 80, y - 4, W - M, y - 4);
   y += 2;
   row('Total:', eur(sale.total_amount), true);
 
@@ -131,7 +131,21 @@ export const generateInvoicePDF = async (data: InvoiceData): Promise<jsPDF> => {
     const lines = doc.splitTextToSize(String(sale.notes), W - 2 * M);
     doc.text(lines, W / 2, y, { align: 'center' }); y += lines.length * 5 + 4;
   }
-  doc.setFont('helvetica', 'bold').setFontSize(12).text('Thank you for your business!', W / 2, y, { align: 'center' });
+  // Fill the rest of the page: signature lines and a footer pinned to the bottom.
+  const H = 297;
+  const sigY = Math.max(y + 20, H - 55);
+  doc.setDrawColor(156, 163, 175).setLineWidth(0.3);
+  doc.line(M, sigY, M + 70, sigY);
+  doc.line(W - M - 70, sigY, W - M, sigY);
+  doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(75, 85, 99);
+  doc.text('Seller signature', M, sigY + 5);
+  doc.text('Customer signature', W - M - 70, sigY + 5);
+  doc.setFillColor(37, 99, 235).rect(0, H - 30, W, 30, 'F');
+  doc.setFont('helvetica', 'bold').setFontSize(14).setTextColor(255, 255, 255);
+  doc.text('Thank you for your business!', W / 2, H - 17, { align: 'center' });
+  doc.setFont('helvetica', 'normal').setFontSize(9);
+  const contact = [company?.name, company?.phone, company?.email].filter(Boolean).join('  |  ');
+  if (contact) doc.text(String(contact), W / 2, H - 10, { align: 'center' });
   return doc;
 };
 

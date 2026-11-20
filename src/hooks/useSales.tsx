@@ -25,7 +25,7 @@ export const useSales = () => {
           *,
           sale_items(
             *,
-            inventory_items(name, sku, description, storage, color, condition)
+            inventory_items(name, sku, warranty, storage, color, condition)
           )
         `)
         .order('created_at', { ascending: false });
@@ -36,7 +36,7 @@ export const useSales = () => {
           inventory_items: {
             name: string;
             sku: string;
-            description: string | null;
+            warranty: string | null;
             storage: string | null;
             color: string | null;
             condition: string | null;

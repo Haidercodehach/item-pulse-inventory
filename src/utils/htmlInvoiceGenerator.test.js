@@ -10,7 +10,7 @@ const device = {
   inventory_items: {
     name: "iPhone 13 Pro",
     sku: "353312345678901",
-    description: "Unlocked and fully tested",
+    warranty: "12 months",
     storage: "256 GB",
     color: "Graphite",
     condition: "Usato 94%",
@@ -22,7 +22,7 @@ describe("invoice device details", () => {
     expect(invoiceDeviceLines(device)).toEqual([
       "Device Name: iPhone 13 Pro",
       "IMEI Number: 353312345678901",
-      "Description: Unlocked and fully tested",
+      "Warranty: 12 months",
       "Storage: 256 GB",
       "Details: Color: Graphite; Condition: Usato 94%",
       "Sale Type: Used",
@@ -32,7 +32,7 @@ describe("invoice device details", () => {
   it("keeps all fields visible when an older item has missing details", () => {
     const lines = invoiceDeviceLines({ inventory_items: null });
     expect(lines).toHaveLength(6);
-    expect(lines).toContain("Description: Not provided");
+    expect(lines).toContain("Warranty: Not provided");
     expect(lines).toContain("Storage: Not provided");
     expect(lines).toContain("Details: Not provided");
     expect(lines).toContain("Sale Type: Other / Not set");
@@ -67,7 +67,7 @@ describe("invoice device details", () => {
       settings: {},
     });
     const pdf = doc.output();
-    for (const text of ["Device Name:", "IMEI Number:", "Description:", "Storage:", "Details:", "Sale Type:", "Payment Method:", "Card"]) {
+    for (const text of ["Device Name:", "IMEI Number:", "Warranty:", "Storage:", "Details:", "Sale Type:", "Payment Method:", "Card"]) {
       expect(pdf).toContain(text);
     }
   });
